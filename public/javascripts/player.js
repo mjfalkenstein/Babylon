@@ -34,7 +34,7 @@ class Player {
 
     placePlayerOnFloor(floor) {
         this.floor = floor;
-        this.pos = {x: floor.entrance[0], y: floor.entrance[1]};
+        this.pos = {x: floor.entrance.x, y: floor.entrance.y};
         this.floor.initMapForPlayer(this);
         this.floor.setRoomVisible(this.pos.x, this.pos.y, true);
         return InputHandler.promptUserForInput(this);
@@ -82,7 +82,7 @@ class Player {
         if (this.floor.id !== matchingFloor) return 'Your ' + key.name + ' does not work on this floor.';
         if (matchingDoorCoords[0] !== this.pos.x || matchingDoorCoords[1] !== this.pos.y) return 'Your ' + key.name + ' does not work here.';
 
-        if (tokens.length === 2) {
+        if (tokens.length >= 2) {
             return this.handleOpenDoor(key, currentWalls, matchingDoorDir);
         } else {
             if (utils.getDirectionFromString(tokens[3] || "BAD DIRECTION") !== matchingDoorDir) return 'Cannot use your ' + key.name + ' in that way.';

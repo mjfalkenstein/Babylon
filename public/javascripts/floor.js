@@ -3,11 +3,12 @@
 let path = require('path'),
     Room = require(path.resolve('room.js')),
     Wall = require(path.resolve('wall.js')),
+    _ = require('lodash'),
     enums = require(path.resolve('enums.js'));
 
 let FOG_OF_WAR = '░';
 let WALL = '█';
-let PLAYER = '0';
+let PLAYER = '@';
 let FLOOR = ' ';
 let DOOR = 'D';
 
@@ -18,7 +19,10 @@ class Floor {
         this.id = -1;
         this.rooms = new Array(width);
         this.walls = new Array(width);
-        this.entrance = [0, 0];
+        this.entrance = {
+            x: 0,
+            y: 0
+        };
         this.exit = {
             x: this.width,
             y: this.height,
@@ -156,14 +160,15 @@ class Floor {
     }
 
     handleExit(input, player) {
-        console.log('handleExit');
         input = input.replace('go', '').replace('move', '').replace('walk', '').trim();
         if (!this.exit.nextFloor) {
             return 'You have reached the exit of the final floor!';
         } else {
             if (input.includes('stairs') || input.includes('steps')) {
                 player.placePlayerOnFloor(this.exit.nextFloor);
-                return 'You take the stairs.';
+                let entranceRoom = this.exit.nextFloor.rooms[this.exit.nextFloor.entrance.x]
+                                                            [this.exit.nextFloor.entrance.y].description;
+                return 'You take the stairs.\n' + entranceRoom;
             }
         }
     }
@@ -221,6 +226,20 @@ class Floor {
             }
         }
         return retString;
+    }
+
+    teleportPlayerToRoom(player, targetX, targetY) {
+        _.forEach(this.rooms, function(row) {
+            _.forEach(row, (room) => {
+                room.visible = false;
+            });
+        });
+        player.pos.x = targetX;
+        player.pos.y = targetY;
+        if (!this.rooms[targetX][targetY].visible) {
+            this.rooms[targetX][targetY].visible = true;
+            return this.rooms[targetX][targetY].description;
+        }
     }
 
     initMapForPlayer(player) {

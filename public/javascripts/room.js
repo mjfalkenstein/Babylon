@@ -13,7 +13,7 @@ class Room {
         this.hiddenItems = hiddenItems;
         this.visible = false;
         this.players = [];
-        this.specialCommands = [];
+        this.specialCommands = new Map();
     }
 
     toJSON() {
@@ -37,20 +37,21 @@ class Room {
         } else if (input.startsWith('pick up') || input.startsWith('get') || input.startsWith('grab')) {
             input = input.replace('pick up', '').replace('get', '').replace('grab', '');
             return this.handleGetItem(input, player);
-        } else if (this.handleSpecialCommands(input)) {
-            /* Do nothing, logic is handled in above line */
+        } else if (this.specialCommands.get(input)) {
+            return this.handleSpecialCommands(input, player)
         } else {
             return player.parseCommand(input);
         }
     }
 
-    handleSpecialCommands(input) {
-        _.forEach(this.specialCommands, function(specialCommand) {
-            if (specialCommand.command.toLowerCase() === input) {
-                return specialCommand.callBack();
-            }
-        });
-        return null;
+    handleSpecialCommands(input, player) {
+        let callback = this.specialCommands.get(input);
+        if (!callback) return null;
+        return callback(player);
+    }
+
+    addSpecialCommand(command, callback) {
+        this.specialCommands.set(command.toLowerCase(), callback);
     }
 
     handleGetItem(input, player) {
@@ -61,14 +62,14 @@ class Room {
             if (similarity > bestSimilarity) {
                 bestSimilarity = similarity;
                 bestItem = item;
-                console.log(item.name + ': ' + similarity);
+                //console.log(item.name + ': ' + similarity);
             }
         });
         if (bestSimilarity > 0.25) {
             this.putItemInPlayerInventory(bestItem, player);
             return 'You picked up the ' + bestItem.name;
         } else {
-            return 'Cannot find item' + input + '.';
+            return 'Cannot find item: ' + input + '.';
         }
     }
 
