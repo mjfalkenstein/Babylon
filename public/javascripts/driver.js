@@ -50,7 +50,9 @@ function main() {
 
     return characterCreator.createCharacter(floor1, testPlayer).then(() => {
         let key1 = new Key();
+        let key2 = new Key();
         floor1.addVisibleItemToRoom(1, 2, key1);
+        floor1.addVisibleItemToRoom(1, 1, key2);
         key1.matchingDoorCoords = [floor1.id, 2, 1, 0];
     });
 }

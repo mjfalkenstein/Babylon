@@ -55,6 +55,7 @@ class Room {
     }
 
     handleGetItem(input, player) {
+        if (player.inventory.length >= player.stats.str) return 'You cannot carry anything else.';
         let bestItem = null;
         let bestSimilarity = 0.0;
         _.forEach(this.visibleItems, function(item) {

@@ -17,9 +17,9 @@ class Player {
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
         this.stats = _.get(other, 'stats', {
             hp: 10,
-            str: 5,
-            dex: 5,
-            int: 5,
+            str: 1,
+            dex: 1,
+            int: 1,
             sex: 'M',
             age: '18',
             height: '1.8',
@@ -62,7 +62,7 @@ class Player {
 
     useItem(input) {
         let tokens = input.split(' ');
-        let itemToUse = this.tryToGetItem(input);
+        let itemToUse = this.tryToSelectItem(input);
         if (typeof itemToUse === 'string') return itemToUse;
         return this.handleUseItem(itemToUse, tokens);
     }
@@ -101,14 +101,14 @@ class Player {
     }
 
     dropItem(input) {
-        let itemToDrop = this.tryToGetItem(input);
+        let itemToDrop = this.tryToSelectItem(input);
         if (typeof itemToDrop === 'string') return itemToDrop;
         this.removeItemFromInventory(itemToDrop);
         this.floor.rooms[this.pos.x][this.pos.y].visibleItems.push(itemToDrop);
         return 'Dropped ' + itemToDrop.name + ' on the ground...';
     }
 
-    tryToGetItem(input) {
+    tryToSelectItem(input) {
         let tokens = input.split(' ');
         let itemToUse = null;
         if (tokens.length < 2) return 'Please specify what to use.';
