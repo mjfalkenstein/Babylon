@@ -70,6 +70,17 @@ class Player {
     handleUseItem(item, tokens) {
         if (item.constructor.name === 'Key') {
             return this.handleUseKey(item, tokens);
+        } else if (item.otherObject) {
+            return this.handleUseItemsTogether(item);
+        }
+    }
+
+    handleUseItemsTogether(item, tokens){
+        let otherItemName = _.get(item, 'otherObject.constructor.name', '').toLowerCase();
+        if (tokens.includes(otherItemName)) {
+            return item.useWithOtherObject();
+        } else {
+            return item.name + ' cannot be used on ' + otherItemName + '.';
         }
     }
 

@@ -5,7 +5,18 @@ class Item {
                 description = '===PLACEHOLDER ITEM DESCRIPTION==='){
         this.name = name;
         this.description = description;
-        this.requiresObj = false;
+        this.otherObject = null;
+        this.useWithOther = null;
+    }
+
+    setOtherObject(otherObject, callback) {
+        this.otherObject = otherObject;
+        this.useWithOther = callback;
+    }
+
+    useWithOtherObject() {
+        if (!this.useWithOtherObject()) return null;
+        return this.useWithOther();
     }
 
     similarity(query) {
