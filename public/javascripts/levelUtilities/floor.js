@@ -169,6 +169,8 @@ class Floor {
                 let entranceRoom = this.exit.nextFloor.rooms[this.exit.nextFloor.entrance.x]
                                                             [this.exit.nextFloor.entrance.y].description;
                 return 'You take the stairs.\n' + entranceRoom;
+            } else {
+                return this.handleDirectionalInput(input, player);
             }
         }
     }
@@ -176,7 +178,7 @@ class Floor {
     handleDirectionalInput(input, player) {
         input = input.replace('go', '').replace('move', '').replace('walk', '').trim();
         let retString = '';
-        if (input === 'north' || input === 'up') {
+        if (input === 'north' || input === 'up' || input === 'n') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.NORTH)) {
                 player.pos.y--;
                 retString += 'You go ' + input + '.\n';
@@ -188,7 +190,7 @@ class Floor {
             } else {
                 retString += 'Cannot go ' + input + ', there\'s something in the way.';
             }
-        } else if (input === 'east' || input === 'right') {
+        } else if (input === 'east' || input === 'right' || input === 'e') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.EAST)) {
                 player.pos.x++;
                 retString += 'You go ' + input + '.\n';
@@ -200,7 +202,7 @@ class Floor {
             } else {
                 retString += 'Cannot go ' + input + ', there\'s something in the way.';
             }
-        } else if (input === 'south' || input === 'down') {
+        } else if (input === 'south' || input === 'down' || input === 's') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.SOUTH)) {
                 player.pos.y++;
                 retString += 'You go ' + input + '.\n';
@@ -212,7 +214,7 @@ class Floor {
             } else {
                 retString += 'Cannot go ' + input + ', there\'s something in the way.';
             }
-        } else if (input === 'west' || input === 'left') {
+        } else if (input === 'west' || input === 'left' || input === 'w') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.WEST)) {
                 player.pos.x--;
                 retString += 'You go ' + input + '.\n';

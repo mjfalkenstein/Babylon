@@ -2,6 +2,7 @@
 
 const readline = require('readline'),
     q = require('q'),
+    _ = require('lodash'),
     rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -16,7 +17,10 @@ class InputHandler {
                     rl.close();
                     throw 'Exiting...';
                 }
-                console.log(player.floor.parseCommand(input, player));
+                let commands = input.split('.');
+                _.forEach(commands, (command) => {
+                    console.log(player.floor.parseCommand(command.trim(), player));
+                });
                 return this.promptUserForInput(player);
             })
         });

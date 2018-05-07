@@ -109,7 +109,7 @@ function allocateStats() {
     let currentStats = {
         str: 1,
         dex: 1,
-        int: 1
+        end: 1
     };
 
     return getStr(currentStats).then((newStats) => {
@@ -117,12 +117,12 @@ function allocateStats() {
         return getDex(newStats);
     }).then((newStats) => {
         currentStats = newStats;
-        return getInt(currentStats);
+        return End(currentStats);
     });
 }
 
 function getStr(currentStats) {
-    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.int) + 1;
+    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.end) + 1;
     let defer = q.defer();
     rl.question('Please enter your desired STRENGTH (1 - ' + remaining + '): ', (input) => {
         currentStats.str = sanitizeInputForStats(input, remaining);
@@ -132,7 +132,7 @@ function getStr(currentStats) {
 }
 
 function getDex(currentStats) {
-    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.int) + 1;
+    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.end) + 1;
     let defer = q.defer();
     rl.question('Please enter your desired DEXTERITY (1 - ' + remaining + '): ', (input) => {
         currentStats.dex = sanitizeInputForStats(input, remaining);
@@ -141,11 +141,11 @@ function getDex(currentStats) {
     return defer.promise;
 }
 
-function getInt(currentStats) {
-    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.int) + 1;
+function getEnd(currentStats) {
+    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.end) + 1;
     let defer = q.defer();
-    rl.question('Please enter your desired INTELLIGENCE (1 - ' + remaining + '): ', (input) => {
-        currentStats.int = sanitizeInputForStats(input, remaining);
+    rl.question('Please enter your desired ENDURANCE (1 - ' + remaining + '): ', (input) => {
+        currentStats.end = sanitizeInputForStats(input, remaining);
         defer.resolve(currentStats);
     });
     return defer.promise;

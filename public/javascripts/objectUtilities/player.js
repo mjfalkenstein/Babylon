@@ -19,7 +19,7 @@ class Player {
             hp: 10,
             str: 5,
             dex: 5,
-            int: 5,
+            end: 5,
             sex: 'M',
             age: '18',
             height: '1.8',
@@ -185,7 +185,7 @@ class Player {
         retString +=    '┃ ┃ HEIGHT: ' + utils.formatStringToGivenLength(this.stats.height + 'M', width - 38);
         retString +=    'DEX: '    + utils.formatStringToGivenLength(this.stats.dex, width - 27) + '┃ ┃\n';
         retString +=    '┃ ┃ WEIGHT: ' + utils.formatStringToGivenLength(this.stats.weight + 'KG', width - 38);
-        retString +=    'INT: '    + utils.formatStringToGivenLength(this.stats.int, width - 27) + '┃ ┃\n';
+        retString +=    'END: '    + utils.formatStringToGivenLength(this.stats.end, width - 27) + '┃ ┃\n';
         retString +=    '┃ ┗' + ('━'.repeat(width - 6)) + '┛ ┃\n';
         retString +=    '┗' + ('━'.repeat(width - 2)) + '┛\n';
 
