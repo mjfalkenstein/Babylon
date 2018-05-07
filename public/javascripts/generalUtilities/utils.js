@@ -1,7 +1,7 @@
 'use strict';
 
 let path = require('path'),
-    enums = require(path.resolve('enums.js'));
+    enums = require(path.resolve('generalUtilities/enums.js'));
 
 module.exports.getDirectionFromString = function(input) {
     if (input.toLowerCase() === 'north' || input.toLowerCase() === 'up') return enums.DIRECTIONS.NORTH;

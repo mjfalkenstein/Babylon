@@ -1,10 +1,10 @@
 'use strict';
 
 let path = require('path'),
-    Room = require(path.resolve('room.js')),
-    Wall = require(path.resolve('wall.js')),
+    Room = require(path.resolve('levelUtilities/room.js')),
+    Wall = require(path.resolve('levelUtilities/wall.js')),
     _ = require('lodash'),
-    enums = require(path.resolve('enums.js'));
+    enums = require(path.resolve('generalUtilities/enums.js'));
 
 let FOG_OF_WAR = '░';
 let WALL = '█';

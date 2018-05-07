@@ -1,7 +1,7 @@
 'use strict';
 
 let path = require('path'),
-    enums = require(path.resolve('enums.js'));
+    enums = require(path.resolve('generalUtilities/enums.js'));
 
 class Wall {
     constructor(description = "===PLACEHOLDER WALL DESCRIPTION===",

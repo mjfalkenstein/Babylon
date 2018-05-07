@@ -2,10 +2,10 @@
 
 let _ = require('lodash'),
     path = require('path'),
-    enums = require(path.resolve('enums.js')),
-    utils = require(path.resolve('utils.js')),
+    enums = require(path.resolve('generalUtilities/enums.js')),
+    utils = require(path.resolve('generalUtilities/utils.js')),
     uuid = require('uuid/v1'),
-    InputHandler = require(path.resolve('inputHandler.js'));
+    InputHandler = require(path.resolve('generalUtilities/inputHandler.js'));
 
 class Player {
     constructor(other, floor = {}) {
@@ -17,9 +17,9 @@ class Player {
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
         this.stats = _.get(other, 'stats', {
             hp: 10,
-            str: 1,
-            dex: 1,
-            int: 1,
+            str: 5,
+            dex: 5,
+            int: 5,
             sex: 'M',
             age: '18',
             height: '1.8',
@@ -56,8 +56,21 @@ class Player {
             return this.useItem(input);
         } else if (input.startsWith('drop') || input.startsWith('leave')) {
             return this.dropItem(input);
+        } else if (input.startsWith('examine') || input.startsWith('look at') || input.startsWith('read')) {
+            return this.lookAtItem(input);
         }
         return 'Unknown command: ' + input;
+    }
+
+    lookAtItem(input) {
+        let tokens = input.split(' ');
+        for (let i = 0; i < this.inventory.length; i++) {
+            let itemInInventory = this.inventory[i];
+            if (tokens.includes(itemInInventory.name.toLowerCase())) {
+                return itemInInventory.getDescription();
+            }
+        }
+        return 'You cannot seem to find that in your pockets.';
     }
 
     useItem(input) {
@@ -71,16 +84,25 @@ class Player {
         if (item.constructor.name === 'Key') {
             return this.handleUseKey(item, tokens);
         } else if (item.otherObject) {
-            return this.handleUseItemsTogether(item);
+            return this.handleUseItemsTogether(item, tokens);
         }
+        return 'You cannot use ' + item.name + ' in this way.';
     }
 
     handleUseItemsTogether(item, tokens){
         let otherItemName = _.get(item, 'otherObject.constructor.name', '').toLowerCase();
         if (tokens.includes(otherItemName)) {
-            return item.useWithOtherObject();
+            return item.useWithOtherObject(this);
         } else {
-            return item.name + ' cannot be used on ' + otherItemName + '.';
+            let retString = 'Cannot use ' + item.name + ' in this way.';
+            for (let i = 0; i < this.inventory.length; i++) {
+                let itemInInventory = this.inventory[i];
+                if (itemInInventory.name.toLowerCase() === otherItemName) {
+                    retString += '\nPerhaps you could try it on the ' + itemInInventory.constructor.name + '.';
+                    break;
+                }
+            }
+            return retString;
         }
     }
 

@@ -28,7 +28,10 @@ class Room {
     }
 
     parseCommand(input, player) {
-        if (input === 'examine' || input === 'look' || input === 'search') {
+        if (input.startsWith('examine') || input.startsWith('look') || input.startsWith('search')){
+            if (input.split(' ').length > 1) {
+                return player.parseCommand(input);
+            }
             let retString = this.description + '\n';
             _.forEach(this.visibleItems, function(item) {
                 retString += item.name + '\n';

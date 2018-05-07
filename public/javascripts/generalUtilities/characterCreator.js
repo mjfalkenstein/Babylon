@@ -1,7 +1,7 @@
 'use strict';
 
 let path = require('path'),
-    Player = require(path.resolve('player.js')),
+    Player = require(path.resolve('objectUtilities/player.js')),
     q = require('q'),
     readline = require('readline'),
     rl = readline.createInterface({

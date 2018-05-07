@@ -14,6 +14,10 @@ class Item {
         this.useWithOther = callback;
     }
 
+    getDescription() {
+        return this.description;
+    }
+
     useWithOtherObject() {
         if (!this.useWithOtherObject()) return null;
         return this.useWithOther();

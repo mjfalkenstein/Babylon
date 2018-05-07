@@ -1,15 +1,15 @@
 'use strict';
 
 const path = require('path'),
-    Player = require(path.resolve('player.js')),
-    Floor = require(path.resolve('floor.js')),
-    enums = require(path.resolve('enums.js')),
-    utils = require(path.resolve('utils.js')),
-    Key = require(path.resolve('key.js')),
-    characterCreator = require(path.resolve('characterCreator.js'));
+    Player = require(path.resolve('objectUtilities/player.js')),
+    Floor = require(path.resolve('levelUtilities/floor.js')),
+    enums = require(path.resolve('generalUtilities/enums.js')),
+    Key = require(path.resolve('objectUtilities/key.js')),
+    SDChip = require(path.resolve('objectUtilities/SDChip.js')),
+    dataSlate = require(path.resolve('objectUtilities/dataslate.js')),
+    characterCreator = require(path.resolve('generalUtilities/characterCreator.js'));
 
 function main() {
-
 
     let floor1 = new Floor(5, 3);
     floor1.id = 1;
@@ -51,8 +51,13 @@ function main() {
     return characterCreator.createCharacter(floor1, testPlayer).then(() => {
         let key1 = new Key();
         let key2 = new Key();
+        let sdchip1 = new SDChip();
+        let dataslate1 = new dataSlate();
+        sdchip1.otherObject = dataslate1;
         floor1.addVisibleItemToRoom(1, 2, key1);
         floor1.addVisibleItemToRoom(1, 1, key2);
+        floor1.addVisibleItemToRoom(0, 0, sdchip1);
+        floor1.addVisibleItemToRoom(0, 0, dataslate1);
         key1.matchingDoorCoords = [floor1.id, 2, 1, 0];
     });
 }
