@@ -21,5 +21,12 @@ module.exports = {
         LOCKED: 'L',
         WALL: 'W',
         OPEN: 'O'
+    },
+    DAMAGE_TYPES: {
+        FIRE: 0,
+        ICE: 1,
+        SHOCK: 2,
+        BLUNT: 3,
+
     }
 };

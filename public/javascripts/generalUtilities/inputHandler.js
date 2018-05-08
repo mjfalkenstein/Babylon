@@ -4,6 +4,9 @@ const readline = require('readline'),
     q = require('q'),
     _ = require('lodash'),
     nlp = require('compromise'),
+    path = require('path'),
+    combatHandler = require(path.resolve('generalUtilities/combatHandler.js')),
+    enums = require(path.resolve('generalUtilities/enums.js')),
     rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -21,17 +24,14 @@ class InputHandler {
                 }
                 let commands = input.split('.');
                 _.forEach(commands, (command) => {
-                    // let parsedData = this.retrieveSubjectVerbObject(command.trim());
-                    // console.log(this.parseCommand(parsedData.subject,
-                    //     parsedData.verb, parsedData.object, player));
-                    console.log(this.handleFloorCommands(command, player));
+                    console.log(this.handleCombatCommands(command, this.parseCommand(command), player));
                 });
                 return this.promptUserForInput(player);
             })
         });
     }
 
-    static retrieveSubjectVerbObject(input) {
+    static parseCommand(input) {
         let parsedData = {
             direct: '',
             mainVerb: '',
@@ -68,40 +68,58 @@ class InputHandler {
                 parsedData.direct = noun2.noun;
                 parsedData.indirect = noun1.noun;
             }
-        } else {
+        } else if (nouns.length === 1) {
             parsedData.direct = nouns[0].noun;
         }
 
         return parsedData;
     }
 
-
-    static handleFloorCommands(input, player) {
-        let response = this.handlePrintMap(input, player);
-        if (response) {
-            return response;
-        } else {
-            return this.handleRoomCommands(input, player);
+    static handleCombatCommands(input, parsedInputData, player) {
+        let targetNPC = this.getTargetNPC(player, parsedInputData);
+        if (targetNPC) {
+            player.gameState = enums.GAME_STATES.COMBAT;
+            return combatHandler.resolveCombatOutcome(player, targetNPC, parsedInputData);
         }
+        player.gameState = enums.GAME_STATES.IDLE;
+        return this.handleFloorCommands(input, player);
     }
 
-    static handlePrintMap(input, player) {
-        if (input === 'map') {
-            return player.floor.getFloorMap(player);
-        } else if (player.pos.x === player.floor.exit.x && player.pos.y === player.floor.exit.y) {
-            return player.floor.handleExit(input, player);
-        } else {
-            return player.floor.handleDirectionalInput(input, player);
+    static getTargetNPC(player, parsedInputData) {
+        let directObject = parsedInputData.direct.toLowerCase();
+        let verb = parsedInputData.mainVerb.toLowerCase();
+        if (verb !== 'use' && verb !== 'attack') return null;
+        let currentRoom = player.floor.rooms[player.pos.x][player.pos.y];
+
+        for (let i = 0; i < currentRoom.npcs.length; i++){
+            let npc = currentRoom.npcs[i];
+            if (directObject === npc.constructor.name.toLowerCase() ||
+                directObject === npc.name.toLowerCase()) {
+                return npc;
+            }
         }
+        return null;
+    }
+
+    static handleFloorCommands(input, player) {
+        let retString = '';
+        if (input === 'map') {
+            retString = player.floor.getFloorMap(player);
+        } else if (player.pos.x === player.floor.exit.x && player.pos.y === player.floor.exit.y) {
+            retString = player.floor.handleExit(input, player);
+        } else {
+            retString = player.floor.handleDirectionalInput(input, player);
+        }
+        return retString || this.handleRoomCommands(input, player);
     }
 
     static handleRoomCommands(input, player) {
-        if (input.startsWith('examine') || input.startsWith('look') || input.startsWith('search')){
+        if (input.startsWith('examine') || input.startsWith('look') || input.startsWith('search')) {
             if (input.split(' ').length > 1) {
                 return this.handlePlayerCommands(input, player);
             }
             let retString = player.floor.rooms[player.pos.x][player.pos.y].description + '\n';
-            _.forEach(player.floor.rooms[player.pos.x][player.pos.y].visibleItems, function(item) {
+            _.forEach(player.floor.rooms[player.pos.x][player.pos.y].visibleItems, function (item) {
                 retString += item.name + '\n';
             });
             return retString.trim();

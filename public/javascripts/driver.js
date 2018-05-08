@@ -7,6 +7,7 @@ const path = require('path'),
     Key = require(path.resolve('objectUtilities/key.js')),
     SDChip = require(path.resolve('objectUtilities/SDChip.js')),
     dataSlate = require(path.resolve('objectUtilities/dataslate.js')),
+    Robot = require(path.resolve('objectUtilities/robot.js')),
     characterCreator = require(path.resolve('generalUtilities/characterCreator.js'));
 
 function main() {
@@ -52,12 +53,14 @@ function main() {
     let key2 = new Key();
     let sdchip1 = new SDChip();
     let dataslate1 = new dataSlate();
+    let robot1 = new Robot();
     sdchip1.otherObject = dataslate1;
     floor1.addVisibleItemToRoom(1, 2, key1);
     floor1.addVisibleItemToRoom(1, 1, key2);
     floor1.addVisibleItemToRoom(0, 0, sdchip1);
     floor1.addVisibleItemToRoom(0, 0, dataslate1);
     key1.matchingDoorCoords = [floor1.id, 2, 1, 0];
+    robot1.placeNPCOnFloor(floor1, floor1.entrance.x, floor1.entrance.y);
 
     return characterCreator.createCharacter(floor1, testPlayer);
 }

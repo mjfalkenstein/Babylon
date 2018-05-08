@@ -19,7 +19,7 @@ module.exports.getStringFromDirection = function(dir) {
 };
 
 module.exports.formatStringToGivenLength = function(input, desiredLength) {
-    if(typeof input === 'number') input = input.toString();
+    input = input.toString();
     let difference = input.length - desiredLength;
     if (difference === 0) return input;
     if (difference < 0) {

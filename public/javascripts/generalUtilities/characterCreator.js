@@ -32,6 +32,7 @@ module.exports.createCharacter = function (floor, player) {
         return allocateStats();
     }).then((stats) => {
         Object.keys(stats).forEach((key) => newPlayer.stats[key] = stats[key]);
+        newPlayer.stats.hp = newPlayer.stats.end * 2;
         return confirmNewPlayer(newPlayer);
     }).then((result) => {
         if (result === 'done') return newPlayer.placePlayerOnFloor(floor);
@@ -117,7 +118,7 @@ function allocateStats() {
         return getDex(newStats);
     }).then((newStats) => {
         currentStats = newStats;
-        return End(currentStats);
+        return getEnd(currentStats);
     });
 }
 

@@ -13,7 +13,7 @@ class Player {
         this.discordUsername = _.get(other, 'discordUsername', 'Zero Cool');
         this.id = 'PLAYER:' + uuid();
         this.inventory = _.get(other, 'inventory', []);
-        this.playerState = _.get(other, 'playerState', enums.PLAYER_STATES.HEALTHY);
+        this.healthState = _.get(other, 'healthState', enums.PLAYER_STATES.HEALTHY);
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
         this.stats = _.get(other, 'stats', {
             hp: 10,
@@ -176,7 +176,7 @@ class Player {
             discordUsername: this.discordUsername,
             id: this.id,
             inventory: this.inventory,
-            state: this.playerState,
+            state: this.healthState,
             stats: this.stats,
             pos: this.pos,
             floor: this.floor

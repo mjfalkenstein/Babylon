@@ -12,7 +12,7 @@ class Room {
         this.visibleItems = visibleItems;
         this.hiddenItems = hiddenItems;
         this.visible = false;
-        this.players = [];
+        this.npcs = [];
         this.specialCommands = new Map();
     }
 
@@ -23,7 +23,16 @@ class Room {
             visibleItems: this.visibleItems,
             hiddenItems: this.hiddenItems,
             visible: this.visible,
-            players: this.players
+            npcs: this.npcs
+        }
+    }
+
+    getDescription() {
+        let retString = this.description;
+        if (this.npcs.length > 0) {
+            _.forEach(npcs, (npc) => {
+                retString += '\nYou see ' + npc.name + '!';
+            });
         }
     }
 
@@ -77,6 +86,19 @@ class Room {
             }
         });
         this.hiddenItems = remainingItems;
+    }
+
+    addNPCToRoom(npc) {
+        this.npcs.push(npc);
+        this.description += '\nYou see a ' + npc.name + '!';
+    }
+
+    removeNPCFromRoom(npc) {
+        for(let i = 0; i < this.npcs.length; i++) {
+            if (this.npcs[i].id === npc.id) {
+
+            }
+        }
     }
 }
 
