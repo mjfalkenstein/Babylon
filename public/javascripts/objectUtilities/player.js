@@ -40,28 +40,6 @@ class Player {
         return InputHandler.promptUserForInput(this);
     }
 
-    parseCommand(input) {
-        if (input === 'inventory') {
-            if (this.inventory.length === 0) return 'You are empty-handed!';
-            let retString = 'You are current carrying:\n';
-            if (input.startsWith('inventory')) {
-                _.forEach(this.inventory, function (item) {
-                    retString += item.name + '\n';
-                });
-            }
-            return retString.trim();
-        } else if (input.startsWith('info')) {
-            return this.getIDCard();
-        } else if (input.startsWith('use')) {
-            return this.useItem(input);
-        } else if (input.startsWith('drop') || input.startsWith('leave')) {
-            return this.dropItem(input);
-        } else if (input.startsWith('examine') || input.startsWith('look at') || input.startsWith('read')) {
-            return this.lookAtItem(input);
-        }
-        return 'Unknown command: ' + input;
-    }
-
     lookAtItem(input) {
         let tokens = input.split(' ');
         for (let i = 0; i < this.inventory.length; i++) {

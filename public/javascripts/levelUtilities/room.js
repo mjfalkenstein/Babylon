@@ -27,26 +27,6 @@ class Room {
         }
     }
 
-    parseCommand(input, player) {
-        if (input.startsWith('examine') || input.startsWith('look') || input.startsWith('search')){
-            if (input.split(' ').length > 1) {
-                return player.parseCommand(input);
-            }
-            let retString = this.description + '\n';
-            _.forEach(this.visibleItems, function(item) {
-                retString += item.name + '\n';
-            });
-            return retString.trim();
-        } else if (input.startsWith('pick up') || input.startsWith('get') || input.startsWith('grab')) {
-            input = input.replace('pick up', '').replace('get', '').replace('grab', '');
-            return this.handleGetItem(input, player);
-        } else if (this.specialCommands.get(input)) {
-            return this.handleSpecialCommands(input, player)
-        } else {
-            return player.parseCommand(input);
-        }
-    }
-
     handleSpecialCommands(input, player) {
         let callback = this.specialCommands.get(input);
         if (!callback) return null;

@@ -139,26 +139,6 @@ class Floor {
         return outString;
     }
 
-    parseCommand(input, player) {
-        console.log(player.name + ' entered ' + input);
-        let response = this.handleCommand(input, player);
-        if (response) {
-            return response;
-        } else {
-            return this.rooms[player.pos.x][player.pos.y].parseCommand(input, player);
-        }
-    }
-
-    handleCommand(input, player) {
-        if (input === 'map') {
-            return this.getFloorMap(player);
-        } else if (player.pos.x === this.exit.x && player.pos.y === this.exit.y) {
-            return this.handleExit(input, player);
-        } else {
-            return this.handleDirectionalInput(input, player);
-        }
-    }
-
     handleExit(input, player) {
         input = input.replace('go', '').replace('move', '').replace('walk', '').trim();
         if (!this.exit.nextFloor) {
