@@ -7,7 +7,7 @@ module.exports = {
         SOUTH: 2,
         WEST: 3
     },
-    PLAYER_STATES: {
+    HEALTH_STATES: {
         HEALTHY: 'healthy',
         INJURED: 'injured',
         DEAD: 'dead'
@@ -27,6 +27,7 @@ module.exports = {
         ICE: 1,
         SHOCK: 2,
         BLUNT: 3,
-
+        PIERCE: 4,
+        SLASH: 5
     }
 };

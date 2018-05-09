@@ -17,7 +17,7 @@ class InputHandler {
         return q.when().then(() => {
             rl.question('>', (input) => {
                 input = input.toLowerCase().trim();
-                console.log(player.name + ' entered "' + input + '"');
+                if (player) console.log(player.name + ' entered "' + input + '"');
                 if (input === 'exit') {
                     rl.close();
                     throw 'Exiting...';
@@ -25,6 +25,7 @@ class InputHandler {
                 let commands = input.split('.');
                 _.forEach(commands, (command) => {
                     console.log(this.handleCombatCommands(command, this.parseCommand(command), player));
+                    if (player && player.healthState === enums.HEALTH_STATES.DEAD) player = null;
                 });
                 return this.promptUserForInput(player);
             })
@@ -76,6 +77,7 @@ class InputHandler {
     }
 
     static handleCombatCommands(input, parsedInputData, player) {
+        if (!player) return 'You\'re dead!\nUse \'!load\' to load a previous save.';
         let targetNPC = this.getTargetNPC(player, parsedInputData);
         if (targetNPC) {
             player.gameState = enums.GAME_STATES.COMBAT;
@@ -88,11 +90,11 @@ class InputHandler {
     static getTargetNPC(player, parsedInputData) {
         let directObject = parsedInputData.direct.toLowerCase();
         let verb = parsedInputData.mainVerb.toLowerCase();
-        if (verb !== 'use' && verb !== 'attack') return null;
+        if (verb !== 'use' && verb !== 'attack' && verb !== 'hit' && verb !== 'shoot') return null;
         let currentRoom = player.floor.rooms[player.pos.x][player.pos.y];
 
-        for (let i = 0; i < currentRoom.npcs.length; i++){
-            let npc = currentRoom.npcs[i];
+        for (let i = 0; i < currentRoom.liveNPCs.length; i++){
+            let npc = currentRoom.liveNPCs[i];
             if (directObject === npc.constructor.name.toLowerCase() ||
                 directObject === npc.name.toLowerCase()) {
                 return npc;
@@ -116,11 +118,12 @@ class InputHandler {
     static handleRoomCommands(input, player) {
         if (input.startsWith('examine') || input.startsWith('look') || input.startsWith('search')) {
             if (input.split(' ').length > 1) {
-                return this.handlePlayerCommands(input, player);
+                let retString = player.floor.rooms[player.pos.x][player.pos.y].examineInRoom(input);
+                return retString ? retString : this.handlePlayerCommands(input, player);
             }
-            let retString = player.floor.rooms[player.pos.x][player.pos.y].description + '\n';
+            let retString = player.floor.rooms[player.pos.x][player.pos.y].getDescription();
             _.forEach(player.floor.rooms[player.pos.x][player.pos.y].visibleItems, function (item) {
-                retString += item.name + '\n';
+                retString += '\n' + item.name;
             });
             return retString.trim();
         } else if (input.startsWith('pick up') || input.startsWith('get') || input.startsWith('grab')) {

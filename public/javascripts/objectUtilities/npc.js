@@ -10,8 +10,9 @@ class NPC{
         this.name = _.get(other, 'name', 'NPC');
         this.id = 'NPC:' + uuid();
         this.description = '===PLACEHOLDER NPC DESCRIPTION===';
+        this.deadDescription = '===PLACEGOLDER DEAD NPC DESCRIPTION===';
         this.inventory = _.get(other, 'inventory', []);
-        this.healthState = _.get(other, 'healthState', enums.PLAYER_STATES.HEALTHY);
+        this.healthState = _.get(other, 'healthState', enums.HEALTH_STATES.HEALTHY);
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
         this.stats = _.get(other, 'stats', {
             hp: 10,
@@ -28,12 +29,14 @@ class NPC{
             y: 0
         });
         this.floor = floor;
+        this.weak = [];
+        this.resist = [];
     }
 
     placeNPCOnFloor(floor, x, y) {
         this.floor = floor;
         this.pos = {x: x, y: y};
-        this.floor.rooms[x][y].addNPCToRoom(this);
+        this.floor.rooms[x][y].addLiveNPCToRoom(this);
     }
 }
 

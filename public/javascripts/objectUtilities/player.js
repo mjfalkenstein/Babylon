@@ -13,7 +13,7 @@ class Player {
         this.discordUsername = _.get(other, 'discordUsername', 'Zero Cool');
         this.id = 'PLAYER:' + uuid();
         this.inventory = _.get(other, 'inventory', []);
-        this.healthState = _.get(other, 'healthState', enums.PLAYER_STATES.HEALTHY);
+        this.healthState = _.get(other, 'healthState', enums.HEALTH_STATES.HEALTHY);
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
         this.stats = _.get(other, 'stats', {
             hp: 10,
@@ -30,6 +30,10 @@ class Player {
             y: 0
         });
         this.floor = floor;
+        this.weak = [
+            enums.DAMAGE_TYPES.FIRE
+        ];
+        this.resist = [];
     }
 
     placePlayerOnFloor(floor) {
@@ -48,7 +52,7 @@ class Player {
                 return itemInInventory.getDescription();
             }
         }
-        return 'You cannot seem to find that in your pockets.';
+        return 'You cannot seem to find that.';
     }
 
     useItem(input) {
@@ -91,12 +95,14 @@ class Player {
         let currentWalls = this.floor.walls[this.pos.x][this.pos.y];
 
         if (this.floor.id !== matchingFloor) return 'Your ' + key.name + ' does not work on this floor.';
-        if (matchingDoorCoords[0] !== this.pos.x || matchingDoorCoords[1] !== this.pos.y) return 'Your ' + key.name + ' does not work here.';
+        if (matchingDoorCoords[0] !== this.pos.x || matchingDoorCoords[1] !== this.pos.y)
+            return 'Your ' + key.name + ' does not work here.';
 
         if (tokens.length >= 2) {
             return this.handleOpenDoor(key, currentWalls, matchingDoorDir);
         } else {
-            if (utils.getDirectionFromString(tokens[3] || "BAD DIRECTION") !== matchingDoorDir) return 'Cannot use your ' + key.name + ' in that way.';
+            if (utils.getDirectionFromString(tokens[3] || "BAD DIRECTION") !== matchingDoorDir)
+                return 'Cannot use your ' + key.name + ' in that way.';
             return this. handleOpenDoor(key, currentWalls, matchingDoorDir);
         }
     }
@@ -105,7 +111,8 @@ class Player {
         if (walls[dir].state === enums.WALL_STATES.LOCKED) {
             this.floor.setWallState(this.pos.x, this.pos.y, dir, enums.WALL_STATES.UNLOCKED);
             this.removeItemFromInventory(key);
-            return 'You use your ' + key.name + ' on the ' + utils.getStringFromDirection(dir) + 'ern door, unlocking it!';
+            return 'You use your ' + key.name + ' on the ' +
+                utils.getStringFromDirection(dir) + 'ern door, unlocking it!';
         } else {
             return 'There is nothing to use your ' + key.name + ' on here.';
         }
