@@ -90,8 +90,8 @@ class InputHandler {
     static getTargetNPC(player, parsedInputData) {
         let directObject = parsedInputData.direct.toLowerCase();
         let verb = parsedInputData.mainVerb.toLowerCase();
-        if (verb !== 'use' && verb !== 'attack' && verb !== 'hit' && verb !== 'shoot') return null;
         let currentRoom = player.floor.rooms[player.pos.x][player.pos.y];
+        if (verb !== 'use' && verb !== 'attack' && verb !== 'hit' && verb !== 'shoot') return null;
 
         for (let i = 0; i < currentRoom.liveNPCs.length; i++){
             let npc = currentRoom.liveNPCs[i];

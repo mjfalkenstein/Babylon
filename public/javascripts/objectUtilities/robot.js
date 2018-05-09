@@ -13,6 +13,7 @@ class Robot extends NPC{
         this.deadDescription = '===PLACEHOLDER DEAD ROBOT DESCRIPTION===';
         this.name = _.get(other, 'name', 'Unit0001');
         this.id = 'ROBOT:' + uuid();
+        this.hostile = true;
         this.stats = _.get(other, 'stats', {
             hp: 14,
             str: 8,

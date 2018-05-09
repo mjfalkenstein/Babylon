@@ -62,7 +62,7 @@ function main() {
     floor1.addVisibleItemToRoom(0, 0, sdchip1);
     floor1.addVisibleItemToRoom(0, 0, dataslate1);
     key1.matchingDoorCoords = [floor1.id, 2, 1, 0];
-    robot1.placeNPCOnFloor(floor1, floor1.entrance.x, floor1.entrance.y);
+    robot1.placeNPCOnFloor(floor1, floor1.entrance.x + 1, floor1.entrance.y);
     floor1.addVisibleItemToRoom(floor1.entrance.x, floor1.entrance.y, stunProd1);
 
     return characterCreator.createCharacter(floor1, testPlayer);

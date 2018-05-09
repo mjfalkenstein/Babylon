@@ -4,6 +4,7 @@ let path = require('path'),
     Room = require(path.resolve('levelUtilities/room.js')),
     Wall = require(path.resolve('levelUtilities/wall.js')),
     _ = require('lodash'),
+    combatHandler = require(path.resolve('generalUtilities/combatHandler.js')),
     enums = require(path.resolve('generalUtilities/enums.js'));
 
 let FOG_OF_WAR = '░';
@@ -157,6 +158,8 @@ class Floor {
 
     handleDirectionalInput(input, player) {
         input = input.replace('go', '').replace('move', '').replace('walk', '').trim();
+        let currentRoom = player.floor.rooms[player.pos.x][player.pos.y];
+
         let retString = '';
         if (input === 'north' || input === 'up' || input === 'n') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.NORTH)) {
@@ -207,6 +210,15 @@ class Floor {
                 retString += 'Cannot go ' + input + ', there\'s something in the way.';
             }
         }
+
+
+        _.forEach(currentRoom.liveNPCs, (npc) => {
+            if (npc.hostile) {
+                retString += combatHandler.resolveAttack(npc, player, {});
+                return retString;
+            }
+        });
+
         return retString;
     }
 

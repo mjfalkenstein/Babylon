@@ -11,6 +11,7 @@ class NPC{
         this.id = 'NPC:' + uuid();
         this.description = '===PLACEHOLDER NPC DESCRIPTION===';
         this.deadDescription = '===PLACEGOLDER DEAD NPC DESCRIPTION===';
+        this.hostile = false;
         this.inventory = _.get(other, 'inventory', []);
         this.healthState = _.get(other, 'healthState', enums.HEALTH_STATES.HEALTHY);
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
