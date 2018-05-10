@@ -1,0 +1,92 @@
+{
+  "id": 1,
+  "width": 5,
+  "height": 3,
+  "entrance": {
+    "x": 0,
+    "y": 1
+  },
+  "exit": {
+    "x": 1,
+    "y": 0,
+    "nextFloor": 2
+  },
+  "walls": [
+    {"x": 0, "y": 0, "dir": "south", "state": "open"},
+    {"x": 0, "y": 0, "dir": "east", "state": "open"},
+    {"x": 0, "y": 1, "dir": "east", "state": "open"},
+    {"x": 2, "y": 2, "dir": "north", "state": "open"},
+    {"x": 1, "y": 1, "dir": "south", "state": "open"},
+    {"x": 2, "y": 1, "dir": "east", "state": "open"},
+    {"x": 4, "y": 1, "dir": "north", "state": "open"},
+    {"x": 4, "y": 0, "dir": "west", "state": "open"},
+    {"x": 2, "y": 1, "dir": "north", "state": "open"},
+    {"x": 2, "y": 1, "dir": "west", "state": "open"},
+    {"x": 2, "y": 0, "dir": "east", "state": "open"},
+    {"x": 2, "y": 1, "dir": "north", "state": "locked"}
+  ],
+  "items": [
+    {
+      "type": "key",
+      "visible": true,
+      "id": 0,
+      "x": 1,
+      "y": 2,
+      "matchingDoor": {
+        "x": 2,
+        "y": 1,
+        "dir": "north"
+      }
+    }, {
+      "type": "key",
+      "visible": true,
+      "id": 1,
+      "x": 1,
+      "y": 1,
+      "matchingDoor": {
+        "x": 0,
+        "y": 0,
+        "dir": "north"
+      }
+    }, {
+      "type": "sdchip",
+      "visible": true,
+      "id": 2,
+      "x": 0,
+      "y": 0,
+      "matchingObject": 3
+    }, {
+      "type": "dataslate",
+      "visible": true,
+      "id": 3,
+      "x": 0,
+      "y": 0,
+      "data": "This is your personal dataslate :) :)"
+    }, {
+      "type": "stunprod",
+      "visible": true,
+      "id": 4,
+      "x": 0,
+      "y": 1
+    }
+  ],
+  "npcs": [
+    {
+      "type": "robot",
+      "x": 1,
+      "y": 1,
+      "hostile": true,
+      "description": "A large, sturdy-looking heavy lifter.",
+      "deadDescription": "Its dented hull is leaking some rancid black fluid..."
+    }
+  ],
+  "specialCommands": [
+    {
+      "x": 0,
+      "y": 1,
+      "command": "test",
+      "args": ["player"],
+      "callback": "let retString = player.floor.teleportPlayerToRoom(player, 0, player.floorn.height - 1); return 'You have been teleported to the corner!\\n' + retString;"
+    }
+  ]
+}

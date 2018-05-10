@@ -18,6 +18,13 @@ module.exports.getStringFromDirection = function(dir) {
     if (dir === enums.DIRECTIONS.WEST) return 'west';
 };
 
+module.exports.getWallStateFromString = function(input) {
+    if (input.toLowerCase() === 'open' || input.toLowerCase() === 'o') return enums.WALL_STATES.OPEN;
+    if (input.toLowerCase() === 'wall' || input.toLowerCase() === 'w') return enums.WALL_STATES.WALL;
+    if (input.toLowerCase() === 'locked' || input.toLowerCase() === 'l') return enums.WALL_STATES.LOCKED;
+    if (input.toLowerCase() === 'unlocked' || input.toLowerCase() === 'u') return enums.WALL_STATES.UNLOCKED;
+};
+
 module.exports.formatStringToGivenLength = function(input, desiredLength) {
     input = input.toString();
     let difference = input.length - desiredLength;

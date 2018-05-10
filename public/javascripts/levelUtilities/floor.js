@@ -211,7 +211,6 @@ class Floor {
             }
         }
 
-
         _.forEach(currentRoom.liveNPCs, (npc) => {
             if (npc.hostile) {
                 retString += combatHandler.resolveAttack(npc, player, {});
