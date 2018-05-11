@@ -1,0 +1,30 @@
+{
+  "id": 2,
+  "width": 3,
+  "height": 3,
+  "entrance": {
+    "x": 0,
+    "y": 0
+  },
+  "exit": {
+    "x": 1,
+    "y": 2,
+    "nextFloorID": null
+  },
+  "walls": [
+    {"x": 0, "y": 0, "dir": "east", "state": "open"},
+    {"x": 1, "y": 1, "dir": "north", "state": "open"},
+    {"x": 1, "y": 1, "dir": "east", "state": "open"},
+    {"x": 1, "y": 1, "dir": "south", "state": "open"},
+    {"x": 1, "y": 1, "dir": "west", "state": "open"}
+  ],
+  "items": [
+
+  ],
+  "npcs": [
+
+  ],
+  "specialCommands": [
+
+  ]
+}

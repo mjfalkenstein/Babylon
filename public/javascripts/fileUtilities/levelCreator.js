@@ -12,7 +12,40 @@ let fs = require('fs'),
     utils = require(path.resolve('generalUtilities/utils.js')),
     Floor = require(path.resolve('levelUtilities/floor.js'));
 
-module.exports.createFloor = function (filepath) {
+module.exports.createGame = function (dirPath) {
+    dirPath = '../' + dirPath + '/';
+    let files = fs.readdirSync(dirPath);
+    let floors = [];
+    let firstFloorID = 99999999999;
+    let promise = q.when();
+
+    _.forEach(files, (file) => {
+        promise = promise.then(() => {
+            return createFloor(dirPath + file);
+        }).then((newFloor) => {
+            if (newFloor.id < firstFloorID) firstFloorID = newFloor.id;
+            floors.push(newFloor);
+        });
+    });
+
+    return promise.then(() => {
+        for (let i = 0; i < floors.length; i++) {
+            if (floors[i].nextFloorID) {
+                for (let j = 0; j < floors.length; j++) {
+                    if (floors[j].id === floors[i].nextFloorID) {
+                        floors[i].exit.nextFloor = floors[j];
+                    }
+                }
+            }
+        }
+        return {
+            'floors': floors,
+            'firstFloorID': firstFloorID
+        };
+    });
+};
+
+function createFloor(filepath) {
     let defer = q.defer();
 
     fs.readFile(filepath, (err, data) => {
@@ -24,9 +57,7 @@ module.exports.createFloor = function (filepath) {
         let specialCommands = parsedData.specialCommands;
 
         let newFloor = parseFloorData(parsedData);
-        console.log(newFloor);
         parseWallData(newFloor, walls);
-        console.log(newFloor.walls);
         parseItemData(newFloor, items);
         parseNPCData(newFloor, npcs);
         parseSpecialCommandsData(newFloor, specialCommands);
@@ -35,14 +66,14 @@ module.exports.createFloor = function (filepath) {
     });
 
     return defer.promise;
-};
+}
 
 function parseFloorData(data) {
     let floor = new Floor(data.width, data.height);
     floor.id = data.id;
     floor.entrance = data.entrance;
     floor.exit = data.exit;
-    floor.nextFloor = data.nextFloor;
+    floor.nextFloorID = data.exit.nextFloorID;
 
     return floor;
 }
@@ -67,6 +98,17 @@ function parseItemData(floor, items) {
         }
         newItems.push(newItem);
     });
+
+    for (let i = 0; i < newItems.length; i++) {
+        if (newItems[i].matchingObject) {
+            for (let j = 0; j < newItems.length; j++) {
+                if (newItems[j].id === newItems[i].matchingObject) {
+                    newItems[i].otherObject = newItems[j];
+                    break;
+                }
+            }
+        }
+    }
 }
 
 function getItemFromInput(floor, item) {
