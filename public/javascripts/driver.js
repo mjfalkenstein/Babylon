@@ -8,13 +8,13 @@ const path = require('path'),
 function main() {
 
     return levelCreator.createGame('levels').then((game) => {
-        console.log(game);
         let testPlayer = new Player();
         for (let i = 0; i < game.floors.length; i++) {
             if (game.floors[i].id === game.firstFloorID) {
                 return characterCreator.createCharacter(game.floors[i], testPlayer);
             }
         }
+        throw new Error('No first level defined');
     });
 }
 
