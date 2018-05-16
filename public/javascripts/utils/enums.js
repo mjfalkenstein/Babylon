@@ -23,11 +23,11 @@ module.exports = {
         OPEN: 'O'
     },
     DAMAGE_TYPES: {
-        FIRE: 0,
-        ICE: 1,
-        SHOCK: 2,
-        BLUNT: 3,
-        PIERCE: 4,
-        SLASH: 5
+        FIRE: 'fire',
+        ICE: 'ice',
+        SHOCK: 'shock',
+        BLUNT: 'blunt',
+        PIERCE: 'pierce',
+        SLASH: 'slash'
     }
 };

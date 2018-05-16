@@ -1,7 +1,7 @@
 'use strict';
 
 let path = require('path'),
-    Player = require(path.resolve('objectUtilities/player.js')),
+    Player = require(path.resolve('objects/player.js')),
     q = require('q'),
     readline = require('readline'),
     rl = readline.createInterface({
@@ -10,7 +10,12 @@ let path = require('path'),
     });
 
 module.exports.createCharacter = function (floor, player) {
-    if (player) return player.placePlayerOnFloor(floor);
+    if (player) {
+        let defer = q.defer();
+        player.placePlayerOnFloor(floor);
+        defer.resolve(player);
+        return defer.promise;
+    }
     let newPlayer = new Player();
     return getName().then((name) => {
         newPlayer.name = name;
@@ -35,7 +40,10 @@ module.exports.createCharacter = function (floor, player) {
         newPlayer.stats.hp = newPlayer.stats.end * 2;
         return confirmNewPlayer(newPlayer);
     }).then((result) => {
-        if (result === 'done') return newPlayer.placePlayerOnFloor(floor);
+        if (result === 'done') {
+            newPlayer.placePlayerOnFloor(floor);
+            return newPlayer;
+        }
         return module.exports.createCharacter(floor);
     }).catch((err) => {
         console.log('\n' + err);

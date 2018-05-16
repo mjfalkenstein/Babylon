@@ -2,15 +2,15 @@
 
 let _ = require('lodash'),
     path = require('path'),
-    enums = require(path.resolve('generalUtilities/enums.js')),
-    utils = require(path.resolve('generalUtilities/utils.js')),
-    uuid = require('uuid/v1'),
-    InputHandler = require(path.resolve('generalUtilities/inputHandler.js'));
+    enums = require(path.resolve('utils/enums.js')),
+    utils = require(path.resolve('utils/utils.js')),
+    uuid = require('uuid/v1');
 
 class Player {
     constructor(other, floor = {}) {
         this.name = _.get(other, 'name', 'Dade Murphy');
         this.discordUsername = _.get(other, 'discordUsername', 'Zero Cool');
+        this.discordID = _.get(other, 'discordUsername', 'zerocool');
         this.id = 'PLAYER:' + uuid();
         this.inventory = _.get(other, 'inventory', []);
         this.healthState = _.get(other, 'healthState', enums.HEALTH_STATES.HEALTHY);
@@ -41,7 +41,6 @@ class Player {
         this.pos = {x: floor.entrance.x, y: floor.entrance.y};
         this.floor.initMapForPlayer(this);
         this.floor.setRoomVisible(this.pos.x, this.pos.y, true);
-        return InputHandler.promptUserForInput(this);
     }
 
     lookAtItem(input) {
@@ -89,13 +88,13 @@ class Player {
     }
 
     handleUseKey(key, tokens) {
-        let matchingFloor = key.matchingDoorCoords[0];
-        let matchingDoorCoords = [key.matchingDoorCoords[1], key.matchingDoorCoords[2]];
-        let matchingDoorDir = key.matchingDoorCoords[3];
+        let matchingFloor = key.matchingDoor[0];
+        let matchingDoor = [key.matchingDoor[1], key.matchingDoor[2]];
+        let matchingDoorDir = key.matchingDoor[3];
         let currentWalls = this.floor.walls[this.pos.x][this.pos.y];
 
         if (this.floor.id !== matchingFloor) return 'Your ' + key.name + ' does not work on this floor.';
-        if (matchingDoorCoords[0] !== this.pos.x || matchingDoorCoords[1] !== this.pos.y)
+        if (matchingDoor[0] !== this.pos.x || matchingDoor[1] !== this.pos.y)
             return 'Your ' + key.name + ' does not work here.';
 
         if (tokens.length >= 2) {
@@ -178,16 +177,34 @@ class Player {
     }
 
     toJSON() {
-        return {
-            name: this.name,
-            discordUsername: this.discordUsername,
-            id: this.id,
-            inventory: this.inventory,
-            state: this.healthState,
-            stats: this.stats,
-            pos: this.pos,
-            floor: this.floor
-        }
+        let playerData = {};
+        playerData.name = this.name;
+        playerData.id = this.id;
+        playerData.discordUsername = this.discordUsername;
+        playerData.discordID = this.discordID;
+        playerData.healthState = this.healthState;
+        playerData.gameState = this.gameState;
+        playerData.stats = this.stats;
+        playerData.pos = this.pos;
+        playerData.inventory = [];
+        playerData.weak = [];
+        playerData.resist = [];
+
+        _.forEach(this.inventory, (item) => {
+            let itemToPush = item.toJSON();
+            itemToPush.inPlayerInventory = true;
+            playerData.inventory.push(itemToPush);
+        });
+
+        _.forEach(this.weak, (weakness) => {
+            playerData.weak.push(weakness);
+        });
+
+        _.forEach(this.resist, (resist) => {
+            playerData.resist.push(resist);
+        });
+
+        return playerData;
     }
 }
 

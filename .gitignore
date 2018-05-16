@@ -67,3 +67,4 @@ bin/
 .idea/
 public/images/
 public/stylesheets/
+*.DS_Store

@@ -4,13 +4,13 @@ let fs = require('fs'),
     path = require('path'),
     _ = require('lodash'),
     q = require('q'),
-    Robot = require(path.resolve('objectUtilities/robot.js')),
-    Key = require(path.resolve('objectUtilities/key.js')),
-    SDChip = require(path.resolve('objectUtilities/SDChip.js')),
-    Dataslate = require(path.resolve('objectUtilities/dataslate.js')),
-    StunProd = require(path.resolve('objectUtilities/stunProd.js')),
-    utils = require(path.resolve('generalUtilities/utils.js')),
-    Floor = require(path.resolve('levelUtilities/floor.js'));
+    Robot = require(path.resolve('objects/robot.js')),
+    Key = require(path.resolve('objects/key.js')),
+    SDChip = require(path.resolve('objects/SDChip.js')),
+    Dataslate = require(path.resolve('objects/dataslate.js')),
+    StunProd = require(path.resolve('objects/stunProd.js')),
+    utils = require(path.resolve('utils/utils.js')),
+    Floor = require(path.resolve('levelUtils/floor.js'));
 
 module.exports.createGame = function (dirPath) {
     dirPath = '../' + dirPath + '/';
@@ -21,7 +21,7 @@ module.exports.createGame = function (dirPath) {
 
     _.forEach(files, (file) => {
         promise = promise.then(() => {
-            return createFloor(dirPath + file);
+            return module.exports.createFloor(dirPath + file);
         }).then((newFloor) => {
             if (newFloor.id < firstFloorID) firstFloorID = newFloor.id;
             floors.push(newFloor);
@@ -29,15 +29,6 @@ module.exports.createGame = function (dirPath) {
     });
 
     return promise.then(() => {
-        for (let i = 0; i < floors.length; i++) {
-            if (floors[i].nextFloorID) {
-                for (let j = 0; j < floors.length; j++) {
-                    if (floors[j].id === floors[i].nextFloorID) {
-                        floors[i].exit.nextFloor = floors[j];
-                    }
-                }
-            }
-        }
         return {
             'floors': floors,
             'firstFloorID': firstFloorID
@@ -45,7 +36,7 @@ module.exports.createGame = function (dirPath) {
     });
 };
 
-function createFloor(filepath) {
+module.exports.createFloor = function(filepath) {
     let defer = q.defer();
 
     fs.readFile(filepath, (err, data) => {
@@ -58,7 +49,7 @@ function createFloor(filepath) {
 
         let newFloor = parseFloorData(parsedData);
         parseWallData(newFloor, walls);
-        parseItemData(newFloor, items);
+        module.exports.parseItemData(newFloor, items);
         parseNPCData(newFloor, npcs);
         parseSpecialCommandsData(newFloor, specialCommands);
 
@@ -66,14 +57,28 @@ function createFloor(filepath) {
     });
 
     return defer.promise;
-}
+};
+
+module.exports.createFloorFromJSON = function(parsedData) {
+    let walls = parsedData.walls;
+    let items = parsedData.items;
+    let npcs = parsedData.npcs;
+    let specialCommands = parsedData.specialCommands;
+
+    let newFloor = parseFloorData(parsedData);
+    parseWallData(newFloor, walls);
+    module.exports.parseItemData(newFloor, items);
+    parseNPCData(newFloor, npcs);
+    parseSpecialCommandsData(newFloor, specialCommands);
+
+    return newFloor;
+};
 
 function parseFloorData(data) {
     let floor = new Floor(data.width, data.height);
     floor.id = data.id;
     floor.entrance = data.entrance;
     floor.exit = data.exit;
-    floor.nextFloorID = data.exit.nextFloorID;
 
     return floor;
 }
@@ -87,14 +92,18 @@ function parseWallData(floor, walls) {
     });
 }
 
-function parseItemData(floor, items) {
+module.exports.parseItemData = function(floor, items, player) {
     let newItems = [];
     _.forEach(items, (item) => {
-        let newItem = getItemFromInput(floor, item);
-        if (item.visible) {
-            floor.addVisibleItemToRoom(item.x, item.y, newItem);
+        let newItem = module.exports.getItemFromInput(item);
+        if (item.inPlayerInventory) {
+            player.inventory.push(newItem);
         } else {
-            floor.addHiddenItemToRoom(item.x, item.y, newItem);
+            if (item.visible) {
+                floor.addVisibleItemToRoom(item.x, item.y, newItem);
+            } else {
+                floor.addHiddenItemToRoom(item.x, item.y, newItem);
+            }
         }
         newItems.push(newItem);
     });
@@ -109,14 +118,14 @@ function parseItemData(floor, items) {
             }
         }
     }
-}
+};
 
-function getItemFromInput(floor, item) {
+module.exports.getItemFromInput = function(item) {
     let newItem = null;
     switch (item.type.toLowerCase()) {
         case 'key':
             newItem = new Key();
-            newItem.matchingDoorCoords = [floor.id,
+            newItem.matchingDoor = [item.matchingDoor.floorID,
                 item.matchingDoor.x,
                 item.matchingDoor.y,
                 utils.getDirectionFromString(item.matchingDoor.dir)];
@@ -140,7 +149,7 @@ function getItemFromInput(floor, item) {
     newItem.y = item.y;
     newItem.id = item.id;
     return newItem;
-}
+};
 
 function parseNPCData(floor, npcs) {
     _.forEach(npcs, (npc) => {
@@ -152,6 +161,21 @@ function parseNPCData(floor, npcs) {
             default:
                 throw new Error('Unknown NPC type: ' + npc.type);
         }
+        newNPC.name = npc.name ? npc.name : newNPC.name;
+        newNPC.type = npc.type ? npc.type : newNPC.type;
+        newNPC.id = npc.id ? npc.id : newNPC.id;
+        newNPC.description = npc.description ? npc.description : newNPC.description;
+        newNPC.deadDescription = npc.deadDescription ? npc.deadDescription : newNPC.deadDescription;
+        newNPC.hostile = npc.hostile ? npc.hostile : newNPC.hostile;
+        newNPC.healthState = npc.healthState ? npc.healthState : newNPC.healthState;
+        newNPC.gameState = npc.gameState ? npc.gameState : newNPC.gameState;
+        newNPC.stats = npc.stats ? npc.stats : newNPC.stats;
+        newNPC.pos = npc.x && npc.y ? {'x': npc.x, 'y': npc.y} : {'x': 0, 'y': 0};
+        newNPC.floor = npc.floor ? npc.floor : newNPC.floor;
+        newNPC.alive = npc.alive ? npc.alive : newNPC.alive;
+        newNPC.weak = npc.weak ? npc.weak : newNPC.weak;
+        newNPC.resist = npc.resist ? npc.resist : newNPC.resist;
+        module.exports.parseItemData(null, npc.inventory, newNPC); //load npc inventory
         newNPC.placeNPCOnFloor(floor, npc.x, npc.y);
     });
 }
@@ -160,7 +184,12 @@ function parseSpecialCommandsData(floor, specialCommands) {
     _.forEach(specialCommands, (specialCommand) => {
         floor.rooms[specialCommand.x][specialCommand.y].addSpecialCommand(
             specialCommand.command,
-            new Function(specialCommand.args, specialCommand.callback)
+            {
+                'command': specialCommand.command,
+                'callback': new Function(specialCommand.args, specialCommand.callback),
+                'args': specialCommand.args,
+                'callbackString': specialCommand.callback
+            }
         );
     });
 }

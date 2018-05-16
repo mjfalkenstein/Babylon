@@ -2,8 +2,8 @@
 
 let path = require('path'),
     _ = require('lodash'),
-    enums = require(path.resolve('generalUtilities/enums.js')),
-    utils = require(path.resolve('generalUtilities/utils.js'));
+    enums = require(path.resolve('utils/enums.js')),
+    utils = require(path.resolve('utils/utils.js'));
 
 class combatHandler {
     static resolveCombatOutcome(attacker, defender, parsedInputData) {

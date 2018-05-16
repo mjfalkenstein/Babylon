@@ -3,8 +3,8 @@
 let path = require('path'),
     _ = require('lodash'),
     uuid = require('uuid/v1'),
-    enums = require(path.resolve('generalUtilities/enums.js')),
-    NPC = require(path.resolve('objectUtilities/npc.js'));
+    enums = require(path.resolve('utils/enums.js')),
+    NPC = require(path.resolve('objects/npc.js'));
 
 class Robot extends NPC{
     constructor(other, floor = {}) {

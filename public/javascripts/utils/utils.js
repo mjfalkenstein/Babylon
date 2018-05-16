@@ -1,7 +1,7 @@
 'use strict';
 
 let path = require('path'),
-    enums = require(path.resolve('generalUtilities/enums.js'));
+    enums = require(path.resolve('utils/enums.js'));
 
 module.exports.getDirectionFromString = function(input) {
     if (input.toLowerCase() === 'north' || input.toLowerCase() === 'up') return enums.DIRECTIONS.NORTH;
@@ -23,6 +23,13 @@ module.exports.getWallStateFromString = function(input) {
     if (input.toLowerCase() === 'wall' || input.toLowerCase() === 'w') return enums.WALL_STATES.WALL;
     if (input.toLowerCase() === 'locked' || input.toLowerCase() === 'l') return enums.WALL_STATES.LOCKED;
     if (input.toLowerCase() === 'unlocked' || input.toLowerCase() === 'u') return enums.WALL_STATES.UNLOCKED;
+};
+
+module.exports.getStringFromWallState = function(state) {
+    if (state === enums.WALL_STATES.OPEN) return 'open';
+    if (state === enums.WALL_STATES.WALL) return 'wall';
+    if (state === enums.WALL_STATES.LOCKED) return 'locked';
+    if (state === enums.WALL_STATES.UNLOCKED) return 'unlocked';
 };
 
 module.exports.formatStringToGivenLength = function(input, desiredLength) {

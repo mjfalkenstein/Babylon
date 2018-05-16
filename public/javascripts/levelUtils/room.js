@@ -2,7 +2,7 @@
 
 let uuid = require('uuid/v1'),
     path = require('path'),
-    utils = require(path.resolve('generalUtilities/utils.js')),
+    utils = require(path.resolve('utils/utils.js')),
     _ = require('lodash');
 
 class Room {
@@ -42,13 +42,13 @@ class Room {
     }
 
     handleSpecialCommands(input, player) {
-        let callback = this.specialCommands.get(input);
-        if (!callback) return null;
-        return callback(player);
+        let functionObject = this.specialCommands.get(input);
+        if (!functionObject) return null;
+        return functionObject.callback(player);
     }
 
-    addSpecialCommand(command, callback) {
-        this.specialCommands.set(command.toLowerCase(), callback);
+    addSpecialCommand(command, functionObject) {
+        this.specialCommands.set(command.toLowerCase(), functionObject);
     }
 
     handleGetItem(input, player) {

@@ -1,8 +1,8 @@
 'use strict';
 
 let path = require('path'),
-    enums = require(path.resolve('generalUtilities/enums.js')),
-    Item = require(path.resolve('objectUtilities/item.js'));
+    enums = require(path.resolve('utils/enums.js')),
+    Item = require(path.resolve('objects/item.js'));
 
 class Stunprod extends Item{
     constructor(name = 'Stunprod',

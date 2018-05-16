@@ -1,11 +1,13 @@
 'use strict';
 
 let path = require('path'),
-    Room = require(path.resolve('levelUtilities/room.js')),
-    Wall = require(path.resolve('levelUtilities/wall.js')),
+    Room = require(path.resolve('levelUtils/room.js')),
+    Wall = require(path.resolve('levelUtils/wall.js')),
     _ = require('lodash'),
-    combatHandler = require(path.resolve('generalUtilities/combatHandler.js')),
-    enums = require(path.resolve('generalUtilities/enums.js'));
+    combatHandler = require(path.resolve('utils/combatHandler.js')),
+    levelCreator = require(path.resolve('fileUtils/levelCreator.js')),
+    utils = require(path.resolve('utils/utils.js')),
+    enums = require(path.resolve('utils/enums.js'));
 
 let FOG_OF_WAR = '░';
 let WALL = '█';
@@ -27,7 +29,7 @@ class Floor {
         this.exit = {
             x: this.width,
             y: this.height,
-            nextFloor: null
+            nextFloorFilepath: null
         };
         for (let i = 0; i < width; i++) {
             this.rooms[i] = new Array(height);
@@ -43,42 +45,34 @@ class Floor {
     }
 
     setWallState(x, y, direction, state) {
-        this.walls[x][y][direction].state = state;
         let targetX = x;
         let targetY = y;
-        switch (direction) {
-            case enums.DIRECTIONS.NORTH:
-                if (y === 0) throw 'direction not allowed: ' + direction;
-                targetY--;
-                break;
-            case enums.DIRECTIONS.EAST:
-                if (x === this.width) throw 'direction not allowed: ' + direction;
-                targetX++;
-                break;
-            case enums.DIRECTIONS.SOUTH:
-                if (y === this.height) throw 'direction not allowed: ' + direction;
-                targetY++;
-                break;
-            case enums.DIRECTIONS.WEST:
-                if (x === 0) throw 'direction not allowed: ' + direction;
-                targetX--;
-                break;
-            default:
-                //if an invalid direction is entered, do nothing
-                return;
+        if (state !== enums.WALL_STATES.WALL && state !== enums.WALL_STATES.LOCKED) {
+            switch (direction) {
+                case enums.DIRECTIONS.NORTH:
+                    if (y === 0) throw 'direction not allowed: ' + direction;
+                    targetY--;
+                    break;
+                case enums.DIRECTIONS.EAST:
+                    if (x === this.width) throw 'direction not allowed: ' + direction;
+                    targetX++;
+                    break;
+                case enums.DIRECTIONS.SOUTH:
+                    if (y === this.height) throw 'direction not allowed: ' + direction;
+                    targetY++;
+                    break;
+                case enums.DIRECTIONS.WEST:
+                    if (x === 0) throw 'direction not allowed: ' + direction;
+                    targetX--;
+                    break;
+                default:
+                    //if an invalid direction is entered, do nothing
+                    return;
+            }
         }
         let targetDirection = ((direction + 2) % 4);
+        this.walls[x][y][direction].state = state;
         this.walls[targetX][targetY][targetDirection].state = state;
-    }
-
-    toJSON() {
-        return {
-            width: this.width,
-            height: this.height,
-            rooms: this.rooms,
-            walls: this.walls,
-            id: this.id
-        };
     }
 
     getTraversable(x, y, direction) {
@@ -142,17 +136,19 @@ class Floor {
 
     handleExit(input, player) {
         input = input.replace('go', '').replace('move', '').replace('walk', '').trim();
-        if (!this.exit.nextFloor) {
-            return 'You have reached the exit of the final floor!';
-        } else {
-            if (input.includes('stairs') || input.includes('steps')) {
-                player.placePlayerOnFloor(this.exit.nextFloor);
-                let entranceRoom = this.exit.nextFloor.rooms[this.exit.nextFloor.entrance.x]
-                                                            [this.exit.nextFloor.entrance.y].description;
-                return 'You take the stairs.\n' + entranceRoom;
+        if (input.includes('stairs') || input.includes('steps')) {
+            if (!this.exit.nextFloorFilepath) {
+                return 'You have reached the exit of the final floor!';
             } else {
-                return this.handleDirectionalInput(input, player);
+                return levelCreator.createFloor('../levels/' + this.exit.nextFloorFilepath).then((nextFloor) => {
+                    player.placePlayerOnFloor(nextFloor);
+                    let entranceRoom = nextFloor.rooms[nextFloor.entrance.x]
+                        [nextFloor.entrance.y].description;
+                    return 'You take the stairs.\n' + entranceRoom;
+                });
             }
+        } else {
+            return this.handleDirectionalInput(input, player);
         }
     }
 
@@ -222,7 +218,7 @@ class Floor {
     }
 
     teleportPlayerToRoom(player, targetX, targetY) {
-        _.forEach(this.rooms, function(row) {
+        _.forEach(this.rooms, function (row) {
             _.forEach(row, (room) => {
                 room.visible = false;
             });
@@ -245,6 +241,100 @@ class Floor {
 
     addVisibleItemToRoom(x, y, item) {
         this.rooms[x][y].visibleItems.push(item);
+    }
+
+    getAllNPCS() {
+        let npcs = [];
+        _.forEach(this.rooms, (row) => {
+            _.forEach(row, (room) => {
+                _.forEach(room.liveNPCs, (npc) => {
+                    npc.alive = true;
+                    npcs.push(npc);
+                });
+                _.forEach(room.deadNPCs, (npc) => {
+                    npc.alive = false;
+                    npcs.push(npc);
+                });
+            });
+        });
+        return npcs;
+    }
+
+    toJSON() {
+        let retData = {};
+        retData.id = this.id;
+        retData.width = this.width;
+        retData.height = this.height;
+        retData.entrance = this.entrance;
+        retData.exit = {
+            'x': this.exit.x,
+            'y': this.exit.y,
+            'nextFloorFilepath': this.exit.nextFloorFilepath
+        };
+        retData.walls = [];
+        retData.items = [];
+        retData.npcs = [];
+        retData.specialCommands = [];
+        retData.visibleRooms = [];
+        for (let i = 0; i < this.width; i++) {
+            for (let j = 0; j < this.height; j++) {
+                let room = this.rooms[i][j];
+                if (room.visible) retData.visibleRooms.push({'x': i, 'y': j});
+
+                _.forEach(room.visibleItems, (item) => {
+                    let itemToPush = item.toJSON();
+                    itemToPush.visible = true;
+                    itemToPush.x = i;
+                    itemToPush.y = j;
+                    itemToPush.inPlayerInventory = false;
+                    retData.items.push(itemToPush);
+                });
+
+                _.forEach(room.hiddenItems, (item) => {
+                    let itemToPush = item.toJSON();
+                    itemToPush.visible = false;
+                    itemToPush.x = i;
+                    itemToPush.y = j;
+                    itemToPush.inPlayerInventory = false;
+                    retData.items.push(itemToPush);
+                });
+
+                _.forEach(room.liveNPCs, (npc) => {
+                    let npcToPush = npc.toJSON();
+                    npcToPush.alive = true;
+                    retData.npcs.push(npcToPush);
+                });
+
+                _.forEach(room.deadNPCs, (npc) => {
+                    let npcToPush = npc.toJSON();
+                    npcToPush.alive = false;
+                    retData.npcs.push(npcToPush);
+                });
+
+                room.specialCommands.forEach((command) => {
+                    retData.specialCommands.push({
+                        'x': i,
+                        'y': j,
+                        'command': command.command,
+                        'args': command.args,
+                        'callback': command.callbackString
+                    });
+                });
+
+                for (let k = 0; k < 4; k++) {
+                    if (this.walls[i][j][k].state !== enums.WALL_STATES.WALL) {
+                        retData.walls.push({
+                            'x': i,
+                            'y': j,
+                            'dir': utils.getStringFromDirection(k),
+                            'state': utils.getStringFromWallState(this.walls[i][j][k].state)
+                        });
+                    }
+                }
+            }
+        }
+
+        return retData;
     }
 }
 

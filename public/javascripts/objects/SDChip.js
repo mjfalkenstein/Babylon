@@ -1,7 +1,7 @@
 'use strict';
 
 let path = require('path'),
-    Item = require(path.resolve('objectUtilities/item.js'));
+    Item = require(path.resolve('objects/item.js'));
 
 class sdchip extends Item{
     constructor(name = 'SDChip',
