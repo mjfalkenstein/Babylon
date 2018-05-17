@@ -7,19 +7,19 @@ let _ = require('lodash'),
     uuid = require('uuid/v1');
 
 class Player {
-    constructor(other, floor = {}) {
+    constructor(other, floor = null) {
         this.name = _.get(other, 'name', 'Dade Murphy');
         this.discordUsername = _.get(other, 'discordUsername', 'Zero Cool');
-        this.discordID = _.get(other, 'discordUsername', 'zerocool');
         this.id = 'PLAYER:' + uuid();
         this.inventory = _.get(other, 'inventory', []);
         this.healthState = _.get(other, 'healthState', enums.HEALTH_STATES.HEALTHY);
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
+        this.creationState = 0;
         this.stats = _.get(other, 'stats', {
             hp: 10,
-            str: 5,
-            dex: 5,
-            end: 5,
+            str: 1,
+            dex: 1,
+            end: 1,
             sex: 'M',
             age: '18',
             height: '1.8',
@@ -157,7 +157,7 @@ class Player {
 
     getIDCard() {
         let width = 45;
-        let retString = '┏' + ('━'.repeat(width - 2)) + '┓\n';
+        let retString = '```┏' + ('━'.repeat(width - 2)) + '┓\n';
         retString +=    '┃ NAME: '     + utils.formatStringToGivenLength(this.name, width - 10) + ' ┃\n';
         retString +=    '┃ ALIAS: '    + utils.formatStringToGivenLength(this.discordUsername, width - 11) + ' ┃\n';
         retString +=    '┃ ID: '       + utils.formatStringToGivenLength(this.id.replace('PLAYER:', ''), width - 8) + ' ┃\n';
@@ -171,7 +171,7 @@ class Player {
         retString +=    '┃ ┃ WEIGHT: ' + utils.formatStringToGivenLength(this.stats.weight + 'KG', width - 38);
         retString +=    'END: '    + utils.formatStringToGivenLength(this.stats.end, width - 27) + '┃ ┃\n';
         retString +=    '┃ ┗' + ('━'.repeat(width - 6)) + '┛ ┃\n';
-        retString +=    '┗' + ('━'.repeat(width - 2)) + '┛\n';
+        retString +=    '┗' + ('━'.repeat(width - 2)) + '┛```\n';
 
         return retString;
     }
@@ -181,7 +181,6 @@ class Player {
         playerData.name = this.name;
         playerData.id = this.id;
         playerData.discordUsername = this.discordUsername;
-        playerData.discordID = this.discordID;
         playerData.healthState = this.healthState;
         playerData.gameState = this.gameState;
         playerData.stats = this.stats;
@@ -189,6 +188,7 @@ class Player {
         playerData.inventory = [];
         playerData.weak = [];
         playerData.resist = [];
+        playerData.creationState = this.creationState;
 
         _.forEach(this.inventory, (item) => {
             let itemToPush = item.toJSON();

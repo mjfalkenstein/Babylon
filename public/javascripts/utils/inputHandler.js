@@ -1,7 +1,6 @@
 'user strict';
 
-const readline = require('readline'),
-    q = require('q'),
+const q = require('q'),
     _ = require('lodash'),
     nlp = require('compromise'),
     path = require('path'),
@@ -9,11 +8,8 @@ const readline = require('readline'),
     levelCreator = require(path.resolve('fileUtils/levelCreator.js')),
     Player = require(path.resolve('objects/player.js')),
     combatHandler = require(path.resolve('utils/combatHandler.js')),
+    characterCreator = require(path.resolve('utils/characterCreator.js')),
     enums = require(path.resolve('utils/enums.js')),
-    rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    }),
     Game = mongoose.model('Game', {
         _id: {type: String},
         player: {type: String},
@@ -21,38 +17,40 @@ const readline = require('readline'),
     });
 
 class InputHandler {
-    static promptUserForInput(player) {
-        return this.connect('mongodb://localhost:27017/db').then(() => {
-            rl.question('>', (input) => {
-                if (input && input.length > 0) {
-                    input = input.toLowerCase().trim();
-                    if (player) console.log(player.name + ' entered "' + input + '"');
-                    if (input === 'exit') {
-                        rl.close();
-                        throw 'Exiting...';
-                    } else if (input === 'save') {
-                        return this.save(player).then((result) => {
-                            console.log(result.message);
-                            return this.promptUserForInput(result.player);
-                        })
-                    } else if (input === 'load') {
-                        return this.load(player).then((result) => {
-                            console.log(result.message);
-                            return this.promptUserForInput(result.player);
-                        })
-                    }
-                    let commands = input.split('.');
-                    _.forEach(commands, (command) => {
-                        this.handleCombatCommands(command, this.parseCommand(command), player).then((outString) => {
-                            console.log(outString);
-                        });
-
-                        if (player && player.healthState === enums.HEALTH_STATES.DEAD) player = null;
-                    });
+    static parsePlayerInput(player, msg, firstFloor) {
+        let input = msg.trimmedMessage;
+        let defer = q.defer();
+        if (!player && input !== 'create') {
+            return {'player': player, 'message': 'You have not created a player yet.\n' +
+                'Use \'!load\' to load an existing player, or \'!create\' to create a new player.'};
+        }
+        if (input && input.length > 0) {
+            if (player) console.log(player + ' entered "' + input + '"');
+            if (input.toLowerCase().startsWith('create') || player.creationState !== 'done') {
+                if (input.toLowerCase().startsWith('create')) {
+                    player = new Player();
+                    player.id = msg.author.id;
                 }
-                return this.promptUserForInput(player);
-            })
-        });
+                let returnObject = {};
+                defer.resolve(characterCreator.createCharacter(firstFloor, msg, player).then((results) => {
+                    returnObject = results;
+                    return this.save(results.player);
+                }).then(() => {
+                    return returnObject;
+                }));
+            }
+             else {
+                input = input.toLowerCase();
+                let commands = input.split('.');
+                _.forEach(commands, (command) => {
+                    this.handleCombatCommands(command, this.parseCommand(command), player).then((resultMessage) => {
+                        if (player && player.healthState === enums.HEALTH_STATES.DEAD) player = null;
+                        defer.resolve({'message': resultMessage, 'player': player});
+                    });
+                });
+            }
+        }
+        return defer.promise;
     }
 
     static parseCommand(input) {
@@ -185,15 +183,12 @@ class InputHandler {
         return 'Unknown command: ' + input;
     }
 
-    static connect(dbName) {
-        return mongoose.connect(dbName);
-    };
-
     static save(player) {
+        if (!player) return;
         let defer = q.defer();
         let playerData = JSON.stringify(player.toJSON());
-        let floorData = JSON.stringify(player.floor.toJSON());
-        Game.findOneAndUpdate({'_id': player.discordID}, {$set: {player: playerData, floor: floorData}},
+        let floorData = player.floor ? JSON.stringify(player.floor.toJSON()) : '';
+        Game.findOneAndUpdate({'_id': player.id}, {$set: {player: playerData, floor: floorData}},
             {'upsert': true}, (err) => {
                 if (err) {
                     defer.reject({'message': 'Error occurred while attempting to save!\n' + err, 'player': player});
@@ -205,35 +200,41 @@ class InputHandler {
 
     static load(inputPlayer) {
         let defer = q.defer();
-        Game.findOne({'_id': inputPlayer.discordID}, (err, gameData) => {
-            // console.log(JSON.stringify(JSON.parse(gameData.player), null, 2));
-            // console.log(JSON.stringify(JSON.parse(gameData.floor), null, 2));
+        Game.findOne({'_id': inputPlayer.id}, (err, gameData) => {
             if (err) {
                 defer.reject({'message': 'Error occurred while attempting to load!\n' + err, 'player': inputPlayer});
             }
-            let parsedFloor = JSON.parse(gameData.floor);
-            let parsedPlayer = JSON.parse(gameData.player);
-            let newPlayer = new Player();
-            let newFloor = levelCreator.createFloorFromJSON(parsedFloor);
-            newPlayer.name = parsedPlayer.name;
-            newPlayer._id = parsedPlayer._id;
-            newPlayer.discordUsername = parsedPlayer.discordUsername;
-            newPlayer.discordID = parsedPlayer.discordID;
-            newPlayer.healthState = parsedPlayer.healthState;
-            newPlayer.gameState = parsedPlayer.gameState;
-            newPlayer.stats = parsedPlayer.stats;
-            newPlayer.pos = parsedPlayer.pos;
-            newPlayer.weak = parsedPlayer.weak;
-            newPlayer.resist = parsedPlayer.resist;
-            newPlayer.floor = newFloor;
-            levelCreator.parseItemData(null, parsedPlayer.inventory, newPlayer); //load player inventory
-            newFloor.initMapForPlayer(newPlayer);
-            newFloor.setRoomVisible(newPlayer.pos.x, newPlayer.pos.y, true);
-            _.forEach(parsedFloor.visibleRooms, (coords) => {
-                newFloor.setRoomVisible(coords.x, coords.y, true);
-            });
+            if (gameData) {
+                let parsedPlayer = JSON.parse(gameData.player);
+                let newPlayer = new Player();
+                newPlayer.name = parsedPlayer.name;
+                newPlayer.id = parsedPlayer.id;
+                newPlayer.discordUsername = parsedPlayer.discordUsername;
+                newPlayer.healthState = parsedPlayer.healthState;
+                newPlayer.gameState = parsedPlayer.gameState;
+                newPlayer.stats = parsedPlayer.stats;
+                newPlayer.pos = parsedPlayer.pos;
+                newPlayer.weak = parsedPlayer.weak;
+                newPlayer.resist = parsedPlayer.resist;
+                newPlayer.creationState = parsedPlayer.creationState;
+                levelCreator.parseItemData(null, parsedPlayer.inventory, newPlayer); //load player inventory
 
-            defer.resolve({'message': 'Load successful!', 'player': newPlayer});
+                if (gameData.floor) {
+                    let parsedFloor = JSON.parse(gameData.floor);
+                    let newFloor = levelCreator.createFloorFromJSON(parsedFloor);
+                    _.forEach(parsedFloor.visibleRooms, (coords) => {
+                        newFloor.setRoomVisible(coords.x, coords.y, true);
+                    });
+                    newFloor.initMapForPlayer(newPlayer);
+                    newFloor.setRoomVisible(newPlayer.pos.x, newPlayer.pos.y, true);
+                    newPlayer.floor = newFloor;
+                }
+
+                defer.resolve({'message': 'Load successful!', 'player': newPlayer});
+            } else {
+                defer.resolve({'player': null, 'message': 'You have not created a player yet.\n' +
+                'Use \'-load\' to load an existing player, or \'-create\' to create a new player.'});
+            }
         });
 
         return defer.promise;

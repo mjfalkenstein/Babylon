@@ -2,171 +2,158 @@
 
 let path = require('path'),
     Player = require(path.resolve('objects/player.js')),
-    q = require('q'),
-    readline = require('readline'),
-    rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
+    q = require('q');
 
-module.exports.createCharacter = function (floor, player) {
-    if (player) {
-        let defer = q.defer();
-        player.placePlayerOnFloor(floor);
-        defer.resolve(player);
-        return defer.promise;
+module.exports.createCharacter = function (floor, msg, player) {
+    if (!player) {
+        console.log('here');
+        player = new Player();
+        player.id = msg.author.id;
+        player.discordUsername = msg.author.username;
     }
-    let newPlayer = new Player();
-    return getName().then((name) => {
-        newPlayer.name = name;
-        return getAlias();
-    }).then((alias) => {
-        newPlayer.discordUsername = alias;
-        return getSex();
-    }).then((sex) => {
-        newPlayer.stats.sex = sex;
-        return getAge();
-    }).then((age) => {
-        newPlayer.stats.age = age;
-        return getHeight();
-    }).then((height) => {
-        newPlayer.stats.height = height;
-        return getWeight();
-    }).then((weight) => {
-        newPlayer.stats.weight = weight;
-        return allocateStats();
-    }).then((stats) => {
-        Object.keys(stats).forEach((key) => newPlayer.stats[key] = stats[key]);
-        newPlayer.stats.hp = newPlayer.stats.end * 2;
-        return confirmNewPlayer(newPlayer);
-    }).then((result) => {
-        if (result === 'done') {
-            newPlayer.placePlayerOnFloor(floor);
-            return newPlayer;
-        }
-        return module.exports.createCharacter(floor);
-    }).catch((err) => {
-        console.log('\n' + err);
-        return module.exports.createCharacter(floor);
-    });
+    let defer = q.defer();
+    switch(player.creationState) {
+        case 0:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getName(msg, player)});
+            break;
+        case 1:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getSex(msg, player)});
+            break;
+        case 2:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getAge(msg, player)});
+            break;
+        case 3:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getHeight(msg, player)});
+            break;
+        case 4:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getWeight(msg, player)});
+            break;
+        case 5:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getStr(msg, player)});
+            break;
+        case 6:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getDex(msg, player)});
+            break;
+        case 7:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': getEnd(msg, player)});
+            break;
+        case 8:
+            player.creationState++;
+            defer.resolve({'player': player, 'message': confirmNewPlayer(msg, player)});
+            break;
+        case 9:
+            if (msg.trimmedMessage.toLowerCase() === 'y') {
+                player.creationState = 'done';
+                player.placePlayerOnFloor(floor);
+                defer.resolve({'player': player, 'message': 'Welcome, ' + player.name});
+            } else {
+                player.creationState = 1;
+                defer.resolve(getName(msg, new Player()));
+            }
+    }
+    return defer.promise;
 };
 
-function getName() {
-    let defer = q.defer();
-    rl.question('Please enter your full name (first last) as recorded in the Registrar of Persons.\n' +
+function getName(msg, player) {
+    return 'Please enter your full name (first last) as recorded in the Registrar of Persons.\n' +
         'If you have not been enrolled with the RoP, \n' +
-        'please see your Enrollment Officer for assistance: ', (input) => {
-        if (input.length === 0) return 'Dade Murphy';
-        defer.resolve(input);
-    });
-    return defer.promise;
+        'please see your Enrollment Officer for assistance: ';
 }
 
-function getAlias() {
-    /* Gonna need to grab this from discord, for now just return placeholder */
-    return 'Zero Cool';
+function getSex(msg, player) {
+    player.name = msg.trimmedMessage;
+    player.alias = msg.author.username;
+    return 'Please enter your birth sex (M or F): ';
 }
 
-function getSex() {
-    let defer = q.defer();
-    rl.question('Please enter your birth sex (M or F): ', (input) => {
-        if (input.toLowerCase() !== 'm' && input.toLowerCase() !== 'f') defer.reject(
-            '===INVALID INPUT==='
-        );
-        defer.resolve(input.toUpperCase());
-    });
-    return defer.promise;
+function getAge(msg, player) {
+    if (msg.trimmedMessage.toLowerCase() !== 'm' && msg.trimmedMessage.toLowerCase() !== 'f') {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        player.stats.sex = msg.trimmedMessage.toUpperCase();
+        return 'Please enter your age in standard Earth years: ';
+    }
 }
 
-function getAge() {
-    let defer = q.defer();
-    rl.question('Please enter your age in standard Earth years: ', (input) => {
-        let numValue = parseFloat(input);
-        if (isNaN(input) || numValue <= 0) defer.reject(
-            '===INVALID INPUT==='
-        );
-        defer.resolve(input);
-    });
-    return defer.promise;
+function getHeight(msg, player) {
+    let numValue = parseFloat(msg.trimmedMessage);
+    if (isNaN(msg.trimmedMessage) || numValue <= 0 || numValue > 100) {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        player.stats.age = numValue;
+        return 'Please enter your height in meters: ';
+    }
 }
 
-function getHeight() {
-    let defer = q.defer();
-    rl.question('Please enter your height in meters: ', (input) => {
-        let numValue = parseFloat(input);
-        if (isNaN(input) || numValue <= 0) defer.reject(
-            '===INVALID INPUT==='
-        );
-        defer.resolve(input);
-    });
-    return defer.promise;
+function getWeight(msg, player) {
+    let numValue = parseFloat(msg.trimmedMessage);
+    if (isNaN(msg.trimmedMessage) || numValue <= 0 || numValue > 3) {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        player.stats.height = numValue;
+        return 'Please enter your weight in kilograms: ';
+    }
 }
 
-function getWeight() {
-    let defer = q.defer();
-    rl.question('Please enter your weight in kilograms: ', (input) => {
-        let numValue = parseFloat(input);
-        if (isNaN(input) || numValue <= 0) defer.reject(
-            '===INVALID INPUT==='
-        );
-        defer.resolve(input);
-    });
-    return defer.promise;
+function getStr(msg, player) {
+    let numValue = parseFloat(msg.trimmedMessage);
+    if (isNaN(msg.trimmedMessage) || numValue <= 0 || numValue > 200) {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        player.stats.weight = numValue;
+        let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
+        return 'Please enter your desired STRENGTH (1 - ' + remaining + '): ';
+    }
 }
 
-function allocateStats() {
-    let currentStats = {
-        str: 1,
-        dex: 1,
-        end: 1
-    };
-
-    return getStr(currentStats).then((newStats) => {
-        currentStats = newStats;
-        return getDex(newStats);
-    }).then((newStats) => {
-        currentStats = newStats;
-        return getEnd(currentStats);
-    });
+function getDex(msg, player) {
+    let numValue = parseFloat(msg.trimmedMessage);
+    if (isNaN(msg.trimmedMessage)) {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
+        player.stats.str = sanitizeInputForStats(numValue, remaining);
+        remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
+        return 'Please enter your desired DEXTERITY (1 - ' + remaining + '): ';
+    }
 }
 
-function getStr(currentStats) {
-    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.end) + 1;
-    let defer = q.defer();
-    rl.question('Please enter your desired STRENGTH (1 - ' + remaining + '): ', (input) => {
-        currentStats.str = sanitizeInputForStats(input, remaining);
-        defer.resolve(currentStats);
-    });
-    return defer.promise;
+function getEnd(msg, player) {
+    let numValue = parseFloat(msg.trimmedMessage);
+    if (isNaN(msg.trimmedMessage)) {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
+        player.stats.dex = sanitizeInputForStats(numValue, remaining);
+        remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
+        return 'Please enter your desired ENDURANCE (1 - ' + remaining + '): ';
+    }
 }
 
-function getDex(currentStats) {
-    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.end) + 1;
-    let defer = q.defer();
-    rl.question('Please enter your desired DEXTERITY (1 - ' + remaining + '): ', (input) => {
-        currentStats.dex = sanitizeInputForStats(input, remaining);
-        defer.resolve(currentStats);
-    });
-    return defer.promise;
-}
-
-function getEnd(currentStats) {
-    let remaining = 15 - (currentStats.str + currentStats.dex + currentStats.end) + 1;
-    let defer = q.defer();
-    rl.question('Please enter your desired ENDURANCE (1 - ' + remaining + '): ', (input) => {
-        currentStats.end = sanitizeInputForStats(input, remaining);
-        defer.resolve(currentStats);
-    });
-    return defer.promise;
-}
-
-function confirmNewPlayer(player) {
-    let defer = q.defer();
-    rl.question(player.getIDCard() + 'Is this information correct? (y/n)? ', (input) => {
-        if (input.toLowerCase() === 'y') defer.resolve('done');
-        defer.resolve();
-    });
-    return defer.promise;
+function confirmNewPlayer(msg, player) {
+    let numValue = parseFloat(msg.trimmedMessage);
+    if (isNaN(msg.trimmedMessage)) {
+        player.creationState = 0;
+        return '===INVALID INPUT===\n' + getName();
+    } else {
+        let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
+        player.stats.end = sanitizeInputForStats(numValue, remaining);
+        return player.getIDCard() + 'Is this information correct? (y/n)? ';
+    }
 }
 
 function sanitizeInputForStats(input, remaining) {

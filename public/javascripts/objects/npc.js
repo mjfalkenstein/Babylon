@@ -18,9 +18,9 @@ class NPC{
         this.gameState = _.get(other, 'gameState', enums.GAME_STATES.IDLE);
         this.stats = _.get(other, 'stats', {
             hp: 10,
-            str: 5,
-            dex: 5,
-            end: 5,
+            str: 1,
+            dex: 1,
+            end: 1,
             sex: 'X',
             age: 'X',
             height: '1.75',

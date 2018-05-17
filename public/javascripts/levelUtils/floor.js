@@ -109,7 +109,7 @@ class Floor {
     }
 
     getFloorMap(player) {
-        let outString = '';
+        let outString = '```';
 
         for (let i = 0; i < this.height; i++) {
             for (let k = 0; k < 3; k++) {
@@ -131,7 +131,7 @@ class Floor {
             }
         }
 
-        return outString;
+        return outString + '```';
     }
 
     handleExit(input, player) {
