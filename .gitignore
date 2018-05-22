@@ -68,3 +68,4 @@ bin/
 public/images/
 public/stylesheets/
 *.DS_Store
+*/auth.json

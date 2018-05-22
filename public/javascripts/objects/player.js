@@ -162,14 +162,14 @@ class Player {
         retString +=    '┃ ALIAS: '    + utils.formatStringToGivenLength(this.discordUsername, width - 11) + ' ┃\n';
         retString +=    '┃ ID: '       + utils.formatStringToGivenLength(this.id.replace('PLAYER:', ''), width - 8) + ' ┃\n';
         retString +=    '┃ ┏'          + ('━'.repeat(width - 6)) + '┓ ┃\n';
-        retString +=    '┃ ┃    SEX: ' + utils.formatStringToGivenLength(this.stats.sex, width - 38);
-        retString +=    ' HP: '    + utils.formatStringToGivenLength(this.stats.hp, width - 27) + '┃ ┃\n';
-        retString +=    '┃ ┃    AGE: ' + utils.formatStringToGivenLength(this.stats.age, width - 38);
-        retString +=    'STR: '    + utils.formatStringToGivenLength(this.stats.str, width - 27) + '┃ ┃\n';
-        retString +=    '┃ ┃ HEIGHT: ' + utils.formatStringToGivenLength(this.stats.height + 'M', width - 38);
-        retString +=    'DEX: '    + utils.formatStringToGivenLength(this.stats.dex, width - 27) + '┃ ┃\n';
-        retString +=    '┃ ┃ WEIGHT: ' + utils.formatStringToGivenLength(this.stats.weight + 'KG', width - 38);
-        retString +=    'END: '    + utils.formatStringToGivenLength(this.stats.end, width - 27) + '┃ ┃\n';
+        retString +=    '┃ ┃    SEX: ' + utils.formatStringToGivenLength(this.stats.sex, width - 39);
+        retString +=    '  HP: '    + utils.formatStringToGivenLength(this.stats.hp, width - 27) + '┃ ┃\n';
+        retString +=    '┃ ┃    AGE: ' + utils.formatStringToGivenLength(this.stats.age, width - 39);
+        retString +=    ' STR: '    + utils.formatStringToGivenLength(this.stats.str, width - 27) + '┃ ┃\n';
+        retString +=    '┃ ┃ HEIGHT: ' + utils.formatStringToGivenLength(this.stats.height + 'M', width - 39);
+        retString +=    ' DEX: '    + utils.formatStringToGivenLength(this.stats.dex, width - 27) + '┃ ┃\n';
+        retString +=    '┃ ┃ WEIGHT: ' + utils.formatStringToGivenLength(this.stats.weight + 'KG', width - 39);
+        retString +=    ' END: '    + utils.formatStringToGivenLength(this.stats.end, width - 27) + '┃ ┃\n';
         retString +=    '┃ ┗' + ('━'.repeat(width - 6)) + '┛ ┃\n';
         retString +=    '┗' + ('━'.repeat(width - 2)) + '┛```\n';
 

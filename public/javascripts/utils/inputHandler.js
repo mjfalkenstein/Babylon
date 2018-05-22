@@ -18,14 +18,25 @@ const q = require('q'),
 
 class InputHandler {
     static parsePlayerInput(player, msg, firstFloor) {
-        let input = msg.trimmedMessage;
+        let input = msg.trimmedMessage.toLowerCase();
         let defer = q.defer();
-        if (!player && input !== 'create') {
-            return {'player': player, 'message': 'You have not created a player yet.\n' +
-                'Use \'!load\' to load an existing player, or \'!create\' to create a new player.'};
-        }
         if (input && input.length > 0) {
-            if (player) console.log(player.username + ' entered "' + input + '"');
+            if (input === 'help') {
+                return {'player': player, 'message': this.getHelpMessage()};
+            }
+            if (!player && input !== 'create') {
+                return {
+                    'player': player, 'message': 'You have not created a player yet.\n' +
+                    'Use \'!create\' to create a new player.'
+                };
+            }
+            if (player && player.gameState === enums.GAME_STATES.GAME_DONE && input !== 'create') {
+                return {'player': player, 'message': this.gameBeatenMessage()};
+            }
+            if (player && player.healthState === enums.HEALTH_STATES.DEAD && input !== 'create') {
+                return {'player': player, 'message': this.playerDeadMessage()};
+            }
+            if (player) console.log(player.discordUsername + ' (' + player.id + ') entered "' + input + '"');
             if (input.toLowerCase().startsWith('create') || player.creationState !== 'done') {
                 if (input.toLowerCase().startsWith('create')) {
                     player = new Player();
@@ -39,12 +50,10 @@ class InputHandler {
                     return returnObject;
                 }));
             }
-             else {
-                input = input.toLowerCase();
+            else {
                 let commands = input.split('.');
                 _.forEach(commands, (command) => {
                     this.handleCombatCommands(command, this.parseCommand(command), player).then((resultMessage) => {
-                        if (player && player.healthState === enums.HEALTH_STATES.DEAD) player = null;
                         defer.resolve({'message': resultMessage, 'player': player});
                     });
                 });
@@ -148,7 +157,7 @@ class InputHandler {
             }
             let retString = player.floor.rooms[player.pos.x][player.pos.y].getDescription();
             _.forEach(player.floor.rooms[player.pos.x][player.pos.y].visibleItems, function (item) {
-                retString += '\n' + item.name;
+                retString += '\nYou see ' + item.description + '.';
             });
             return retString.trim();
         } else if (input.startsWith('pick up') || input.startsWith('get') || input.startsWith('grab')) {
@@ -188,7 +197,6 @@ class InputHandler {
         let defer = q.defer();
         let playerData = JSON.stringify(player.toJSON());
         let floorData = player.floor ? JSON.stringify(player.floor.toJSON()) : '';
-        //console.log(player.floor.toJSON());
         Game.findOneAndUpdate({'_id': player.id}, {$set: {player: playerData, floor: floorData}},
             {'upsert': true}, (err) => {
                 if (err) {
@@ -233,12 +241,72 @@ class InputHandler {
 
                 defer.resolve({'message': 'Load successful!', 'player': newPlayer});
             } else {
-                defer.resolve({'player': null, 'message': 'You have not created a player yet.\n' +
-                'Use \'-load\' to load an existing player, or \'-create\' to create a new player.'});
+                defer.resolve({
+                    'player': null, 'message': 'You have not created a player yet.\n' +
+                    'Use \'-load\' to load an existing player, or \'-create\' to create a new player.'
+                });
             }
         });
 
         return defer.promise;
+    }
+
+    static gameBeatenMessage() {
+        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃ You have reached the exit of the final floor! ┃\n';
+        retString +=        '┃             Thanks for playing!               ┃\n';
+        retString +=        '┃     You may use \'!create\' to create a new     ┃\n';
+        retString +=        '┃           character at any time.              ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
+        return retString;
+    }
+
+    static playerDeadMessage() {
+        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃               You have died.                  ┃\n';
+        retString +=        '┃     You may use \'!create\' to create a new     ┃\n';
+        retString +=        '┃           character at any time.              ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
+        return retString;
+    }
+
+    static getHelpMessage() {
+        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃ Command    ┃ Description                         ┃\n';
+        retString +=        '┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃\n';
+        retString +=        '┃ !create    ┃ create a new character. START HERE  ┃\n';
+        retString +=        '┃ ==== THIS WILL DELETE YOUR CURRENT PROGRESS ==== ┃\n';
+        retString +=        '┃ !look      ┃ look around the room you\'re in.     ┃\n';
+        retString +=        '┃     note:  ┃ \'examine\' or \'search\' work too!     ┃\n';
+        retString +=        '┃ !info      ┃ glance at your ID card.             ┃\n';
+        retString +=        '┃ !attack    ┃ attack something (with something).  ┃\n';
+        retString +=        '┃     ex:    ┃ \'!attack robot with stunprod\'       ┃\n';
+        retString +=        '┃ !use       ┃ use an item (with something).       ┃\n';
+        retString +=        '┃     ex:    ┃ \'!use keycard on door\'              ┃\n';
+        retString +=        '┃ !map       ┃ glance at your auto-generated map.  ┃\n';
+        retString +=        '┃ !north     ┃ move north (or south/east/west).    ┃\n';
+        retString +=        '┃     note:  ┃ \'n\' or \'up\' work too!               ┃\n';
+        retString +=        '┃ !stairs    ┃ take the stairs to the next level.  ┃\n';
+        retString +=        '┃ !get       ┃ try to pick up something you see.   ┃\n';
+        retString +=        '┃     note:  ┃ \'take\' or \'grab\' work too!          ┃\n';
+        retString +=        '┃ !drop      ┃ drop an item that you\'re carrying.  ┃\n';
+        retString +=        '┃     note:  ┃ \'leave\' works too!                  ┃\n';
+        retString +=        '┃ !inventory ┃ look at what you\'re carrying.       ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n';
+        retString +=        '┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃ Map Legend                                       ┃\n';
+        retString +=        '┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃\n';
+        retString +=        '┃ ██████░░░░░░░░░ ┃ ░ - unexplored darkness        ┃\n';
+        retString +=        '┃ █   S█░░░░░░░░░ ┃ █ - impassable wall            ┃\n';
+        retString +=        '┃ █ ████░░░░░░░░░ ┃ D - locked door                ┃\n';
+        retString +=        '┃ █ █████D█░░░░░░ ┃ @ - you!                       ┃\n';
+        retString +=        '┃ █      @ ░░░░░░ ┃ S - stairs to the next floor   ┃\n';
+        retString +=        '┃ ████ ██ █░░░░░░ ┃                                ┃\n';
+        retString +=        '┃ ░░░░░░░░░░░░░░░ ┃                                ┃\n';
+        retString +=        '┃ ░░░░░░░░░░░░░░░ ┃                                ┃\n';
+        retString +=        '┃ ░░░░░░░░░░░░░░░ ┃                                ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n```';
+        return retString;
     }
 }
 

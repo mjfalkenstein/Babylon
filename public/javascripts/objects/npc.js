@@ -10,7 +10,7 @@ class NPC{
         this.name = _.get(other, 'name', 'NPC');
         this.id = 'NPC:' + uuid();
         this.description = '===PLACEHOLDER NPC DESCRIPTION===';
-        this.deadDescription = '===PLACEGOLDER DEAD NPC DESCRIPTION===';
+        this.deadDescription = '===PLACEHOLDER DEAD NPC DESCRIPTION===';
         this.hostile = false;
         this.alive = true;
         this.inventory = _.get(other, 'inventory', []);

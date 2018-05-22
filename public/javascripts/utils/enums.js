@@ -14,7 +14,8 @@ module.exports = {
     },
     GAME_STATES: {
         IDLE: 'idle',
-        COMBAT: 'combat'
+        COMBAT: 'combat',
+        GAME_DONE: 'game_done'
     },
     WALL_STATES: {
         UNLOCKED: 'U',

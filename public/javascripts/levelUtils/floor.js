@@ -14,6 +14,7 @@ let WALL = '█';
 let PLAYER = '@';
 let FLOOR = ' ';
 let DOOR = 'D';
+let STAIRS = 'S';
 
 class Floor {
     constructor(width = 3, height = 3) {
@@ -98,6 +99,7 @@ class Floor {
 
     getRoomString(x, y, player) {
         if (x === player.pos.x && y === player.pos.y) return PLAYER;
+        if (this.rooms[x][y].visible && x === this.exit.x && y === this.exit.y) return STAIRS;
         for (let i = 0; i < 4; i++) {
             if (this.getTraversable(x, y, i) && this.rooms[x][y].visible) return FLOOR;
         }
@@ -138,13 +140,20 @@ class Floor {
         input = input.replace('go', '').replace('move', '').replace('walk', '').trim();
         if (input.includes('stairs') || input.includes('steps')) {
             if (!this.exit.nextFloorFilepath) {
-                return 'You have reached the exit of the final floor!';
+                let retString = '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+                retString +=       '┃ You have reached the exit of the final floor! ┃\n';
+                retString +=       '┃             Thanks for playing!               ┃\n';
+                retString +=       '┃     You may use \'!create\' to create a new     ┃\n';
+                retString +=       '┃           character at any time.              ┃\n';
+                retString +=       '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
+                player.gameState = enums.GAME_STATES.GAME_DONE;
+                return retString;
             } else {
                 return levelCreator.createFloor('../levels/' + this.exit.nextFloorFilepath).then((nextFloor) => {
                     player.placePlayerOnFloor(nextFloor);
                     let entranceRoom = nextFloor.rooms[nextFloor.entrance.x]
-                        [nextFloor.entrance.y].description;
-                    return 'You take the stairs.\n' + entranceRoom;
+                        [nextFloor.entrance.y].getDescription();
+                    return 'You take the stairs to a new floor.\n' + entranceRoom;
                 });
             }
         } else {
@@ -167,7 +176,9 @@ class Floor {
                     retString += targetRoom.description;
                 }
             } else {
-                retString += 'Cannot go ' + input + ', there\'s something in the way.';
+                let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
+                    'wall' : 'locked door';
+                retString += 'Cannot go ' + input + ', there\'s a ' + blockingString + ' in the way.';
             }
         } else if (input === 'east' || input === 'right' || input === 'e') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.EAST)) {
@@ -179,7 +190,9 @@ class Floor {
                     retString += targetRoom.description;
                 }
             } else {
-                retString += 'Cannot go ' + input + ', there\'s something in the way.';
+                let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
+                    'wall' : 'locked door';
+                retString += 'Cannot go ' + input + ', there\'s a ' + blockingString + ' in the way.';
             }
         } else if (input === 'south' || input === 'down' || input === 's') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.SOUTH)) {
@@ -191,7 +204,9 @@ class Floor {
                     retString += targetRoom.description;
                 }
             } else {
-                retString += 'Cannot go ' + input + ', there\'s something in the way.';
+                let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
+                    'wall' : 'locked door';
+                retString += 'Cannot go ' + input + ', there\'s a ' + blockingString + ' in the way.';
             }
         } else if (input === 'west' || input === 'left' || input === 'w') {
             if (this.getTraversable(player.pos.x, player.pos.y, enums.DIRECTIONS.WEST)) {
@@ -203,9 +218,19 @@ class Floor {
                     retString += targetRoom.description;
                 }
             } else {
-                retString += 'Cannot go ' + input + ', there\'s something in the way.';
+                let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
+                    'wall' : 'locked door';
+                retString += 'Cannot go ' + input + ', there\'s a ' + blockingString + ' in the way.';
             }
         }
+
+        _.forEach(this.rooms[player.pos.x][player.pos.y].liveNPCs, (npc) => {
+            if (npc.hostile) {
+                retString += 'You see a ' + npc.name + ' , and it looks hostile!';
+            } else {
+                retString += 'You see a ' + npc.name + '.';
+            }
+        });
 
         _.forEach(currentRoom.liveNPCs, (npc) => {
             if (npc.hostile) {
@@ -227,7 +252,7 @@ class Floor {
         player.pos.y = targetY;
         if (!this.rooms[targetX][targetY].visible) {
             this.rooms[targetX][targetY].visible = true;
-            return this.rooms[targetX][targetY].description;
+            return this.rooms[targetX][targetY].getDescription();
         }
     }
 

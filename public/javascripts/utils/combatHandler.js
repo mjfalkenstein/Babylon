@@ -42,15 +42,16 @@ class combatHandler {
 
     static resolveDeath(attacker, defender) {
         if (defender.stats.hp > 0) return '';
-        defender.floor.rooms[defender.pos.x][defender.pos.y].removeNPCFromRoom(defender);
-        defender.floor.rooms[defender.pos.x][defender.pos.y].addDeadNPCToRoom(defender);
         defender.healthState = enums.HEALTH_STATES.DEAD;
 
         if (attacker.constructor.name.toLowerCase() === 'player') {
+            defender.floor.rooms[defender.pos.x][defender.pos.y].removeNPCFromRoom(defender);
+            defender.floor.rooms[defender.pos.x][defender.pos.y].addDeadNPCToRoom(defender);
             return '\nYou\'ve killed ' + defender.name + '!';
         }
+
         return '\nYou\'ve been killed by ' + attacker.name + '!\n' +
-            'Use \'!load\' to load a previous save.';
+            'Use \'!create\' to create a new character.';
     }
 
     static getWeapon(attacker, parsedInputData) {

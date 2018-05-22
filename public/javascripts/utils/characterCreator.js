@@ -6,7 +6,6 @@ let path = require('path'),
 
 module.exports.createCharacter = function (floor, msg, player) {
     if (!player) {
-        console.log('here');
         player = new Player();
         player.id = msg.author.id;
         player.discordUsername = msg.author.username;
@@ -70,13 +69,13 @@ function getName(msg, player) {
 
 function getSex(msg, player) {
     player.name = msg.trimmedMessage;
-    player.alias = msg.author.username;
+    player.discordUsername = msg.author.username;
     return 'Please enter your birth sex (M or F): ';
 }
 
 function getAge(msg, player) {
     if (msg.trimmedMessage.toLowerCase() !== 'm' && msg.trimmedMessage.toLowerCase() !== 'f') {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         player.stats.sex = msg.trimmedMessage.toUpperCase();
@@ -87,7 +86,7 @@ function getAge(msg, player) {
 function getHeight(msg, player) {
     let numValue = parseFloat(msg.trimmedMessage);
     if (isNaN(msg.trimmedMessage) || numValue <= 0 || numValue > 100) {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         player.stats.age = numValue;
@@ -98,7 +97,7 @@ function getHeight(msg, player) {
 function getWeight(msg, player) {
     let numValue = parseFloat(msg.trimmedMessage);
     if (isNaN(msg.trimmedMessage) || numValue <= 0 || numValue > 3) {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         player.stats.height = numValue;
@@ -109,7 +108,7 @@ function getWeight(msg, player) {
 function getStr(msg, player) {
     let numValue = parseFloat(msg.trimmedMessage);
     if (isNaN(msg.trimmedMessage) || numValue <= 0 || numValue > 200) {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         player.stats.weight = numValue;
@@ -121,7 +120,7 @@ function getStr(msg, player) {
 function getDex(msg, player) {
     let numValue = parseFloat(msg.trimmedMessage);
     if (isNaN(msg.trimmedMessage)) {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
@@ -134,7 +133,7 @@ function getDex(msg, player) {
 function getEnd(msg, player) {
     let numValue = parseFloat(msg.trimmedMessage);
     if (isNaN(msg.trimmedMessage)) {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
@@ -147,7 +146,7 @@ function getEnd(msg, player) {
 function confirmNewPlayer(msg, player) {
     let numValue = parseFloat(msg.trimmedMessage);
     if (isNaN(msg.trimmedMessage)) {
-        player.creationState = 0;
+        player.creationState = 1;
         return '===INVALID INPUT===\n' + getName();
     } else {
         let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;

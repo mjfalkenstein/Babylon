@@ -48,15 +48,12 @@ module.exports.createFloor = function(filepath) {
         let specialCommands = parsedData.specialCommands;
         let roomDescriptions = parsedData.roomDescriptions;
 
-        // console.log(roomDescriptions);
-
         let newFloor = parseFloorData(parsedData);
         parseWallData(newFloor, walls);
         module.exports.parseItemData(newFloor, items);
         parseNPCData(newFloor, npcs);
         parseSpecialCommandsData(newFloor, specialCommands);
         parseRoomDescriptions(newFloor, roomDescriptions);
-        // console.log(newFloor.rooms);
 
         defer.resolve(newFloor);
     });
@@ -71,16 +68,12 @@ module.exports.createFloorFromJSON = function(parsedData) {
     let specialCommands = parsedData.specialCommands;
     let roomDescriptions = parsedData.roomDescriptions;
 
-    //console.log(roomDescriptions);
-
     let newFloor = parseFloorData(parsedData);
     parseWallData(newFloor, walls);
     module.exports.parseItemData(newFloor, items);
     parseNPCData(newFloor, npcs);
     parseSpecialCommandsData(newFloor, specialCommands);
     parseRoomDescriptions(newFloor, roomDescriptions);
-
-    //console.log(newFloor.rooms);
 
     return newFloor;
 };
