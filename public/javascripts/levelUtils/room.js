@@ -32,13 +32,16 @@ class Room {
 
     getDescription() {
         let retString = this.description;
-        _.forEach(this.liveNPCs, (npc) => {
-            retString += '\nYou see ' + npc.name + '!';
+        _.forEach(this.liveNPCs, (npc) => {if (npc.hostile) {
+            retString += '\nYou see a ' + npc.name + ' , and it looks hostile!';
+        } else {
+            retString += '\nYou see a ' + npc.name + '.';
+        }
         });
         _.forEach(this.deadNPCs, (npc) => {
             retString += '\n' + npc.deadDescription;
         });
-        return retString;
+        return retString + '\n';
     }
 
     handleSpecialCommands(input, player) {

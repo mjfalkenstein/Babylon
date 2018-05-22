@@ -151,6 +151,7 @@ function confirmNewPlayer(msg, player) {
     } else {
         let remaining = 15 - (player.stats.str + player.stats.dex + player.stats.end) + 1;
         player.stats.end = sanitizeInputForStats(numValue, remaining);
+        player.stats.hp = player.stats.end * 2;
         return player.getIDCard() + 'Is this information correct? (y/n)? ';
     }
 }

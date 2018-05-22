@@ -33,7 +33,7 @@ module.exports.init = function (firstFloor) {
                     return inputHandler.parsePlayerInput(loadResults.player, msg, firstFloor);
                 }).then((result) => {
                     player = result.player;
-                    return msg.reply(result.message);
+                    if (result.message) return msg.reply(result.message);
                 }).then(() => {
                     return savePlayer(player);
                 }).then(() => {

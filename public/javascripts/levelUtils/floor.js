@@ -173,7 +173,7 @@ class Floor {
                 let targetRoom = this.rooms[player.pos.x][player.pos.y];
                 if (!targetRoom.visible) {
                     this.setRoomVisible(player.pos.x, player.pos.y, true);
-                    retString += targetRoom.description;
+                    retString += targetRoom.getDescription();
                 }
             } else {
                 let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
@@ -187,7 +187,7 @@ class Floor {
                 let targetRoom = this.rooms[player.pos.x][player.pos.y];
                 if (!targetRoom.visible) {
                     this.setRoomVisible(player.pos.x, player.pos.y, true);
-                    retString += targetRoom.description;
+                    retString += targetRoom.getDescription();
                 }
             } else {
                 let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
@@ -201,7 +201,7 @@ class Floor {
                 let targetRoom = this.rooms[player.pos.x][player.pos.y];
                 if (!targetRoom.visible) {
                     this.setRoomVisible(player.pos.x, player.pos.y, true);
-                    retString += targetRoom.description;
+                    retString += targetRoom.getDescription();
                 }
             } else {
                 let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
@@ -215,7 +215,7 @@ class Floor {
                 let targetRoom = this.rooms[player.pos.x][player.pos.y];
                 if (!targetRoom.visible) {
                     this.setRoomVisible(player.pos.x, player.pos.y, true);
-                    retString += targetRoom.description;
+                    retString += targetRoom.getDescription();
                 }
             } else {
                 let blockingString = this.walls[player.pos.x][player.pos.y][0].state === enums.WALL_STATES.WALL ?
@@ -223,14 +223,6 @@ class Floor {
                 retString += 'Cannot go ' + input + ', there\'s a ' + blockingString + ' in the way.';
             }
         }
-
-        _.forEach(this.rooms[player.pos.x][player.pos.y].liveNPCs, (npc) => {
-            if (npc.hostile) {
-                retString += 'You see a ' + npc.name + ' , and it looks hostile!';
-            } else {
-                retString += 'You see a ' + npc.name + '.';
-            }
-        });
 
         _.forEach(currentRoom.liveNPCs, (npc) => {
             if (npc.hostile) {
