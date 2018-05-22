@@ -40,18 +40,23 @@ module.exports.createFloor = function(filepath) {
     let defer = q.defer();
 
     fs.readFile(filepath, (err, data) => {
-        if (err) throw err;
+        if (err) defer.reject(err);
         let parsedData = JSON.parse(data);
         let walls = parsedData.walls;
         let items = parsedData.items;
         let npcs = parsedData.npcs;
         let specialCommands = parsedData.specialCommands;
+        let roomDescriptions = parsedData.roomDescriptions;
+
+        // console.log(roomDescriptions);
 
         let newFloor = parseFloorData(parsedData);
         parseWallData(newFloor, walls);
         module.exports.parseItemData(newFloor, items);
         parseNPCData(newFloor, npcs);
         parseSpecialCommandsData(newFloor, specialCommands);
+        parseRoomDescriptions(newFloor, roomDescriptions);
+        // console.log(newFloor.rooms);
 
         defer.resolve(newFloor);
     });
@@ -64,12 +69,18 @@ module.exports.createFloorFromJSON = function(parsedData) {
     let items = parsedData.items;
     let npcs = parsedData.npcs;
     let specialCommands = parsedData.specialCommands;
+    let roomDescriptions = parsedData.roomDescriptions;
+
+    //console.log(roomDescriptions);
 
     let newFloor = parseFloorData(parsedData);
     parseWallData(newFloor, walls);
     module.exports.parseItemData(newFloor, items);
     parseNPCData(newFloor, npcs);
     parseSpecialCommandsData(newFloor, specialCommands);
+    parseRoomDescriptions(newFloor, roomDescriptions);
+
+    //console.log(newFloor.rooms);
 
     return newFloor;
 };
@@ -89,6 +100,12 @@ function parseWallData(floor, walls) {
             wall.y,
             utils.getDirectionFromString(wall.dir),
             utils.getWallStateFromString(wall.state));
+    });
+}
+
+function parseRoomDescriptions(floor, rooms) {
+    _.forEach(rooms, (room) => {
+        floor.rooms[room.x][room.y].description = room.description;
     });
 }
 

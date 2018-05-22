@@ -25,7 +25,7 @@ class InputHandler {
                 'Use \'!load\' to load an existing player, or \'!create\' to create a new player.'};
         }
         if (input && input.length > 0) {
-            if (player) console.log(player + ' entered "' + input + '"');
+            if (player) console.log(player.username + ' entered "' + input + '"');
             if (input.toLowerCase().startsWith('create') || player.creationState !== 'done') {
                 if (input.toLowerCase().startsWith('create')) {
                     player = new Player();
@@ -188,6 +188,7 @@ class InputHandler {
         let defer = q.defer();
         let playerData = JSON.stringify(player.toJSON());
         let floorData = player.floor ? JSON.stringify(player.floor.toJSON()) : '';
+        //console.log(player.floor.toJSON());
         Game.findOneAndUpdate({'_id': player.id}, {$set: {player: playerData, floor: floorData}},
             {'upsert': true}, (err) => {
                 if (err) {

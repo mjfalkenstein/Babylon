@@ -276,10 +276,16 @@ class Floor {
         retData.npcs = [];
         retData.specialCommands = [];
         retData.visibleRooms = [];
+        retData.roomDescriptions = [];
         for (let i = 0; i < this.width; i++) {
             for (let j = 0; j < this.height; j++) {
                 let room = this.rooms[i][j];
                 if (room.visible) retData.visibleRooms.push({'x': i, 'y': j});
+                retData.roomDescriptions.push({
+                    'x': i,
+                    'y': j,
+                    'description': room.description
+                });
 
                 _.forEach(room.visibleItems, (item) => {
                     let itemToPush = item.toJSON();
