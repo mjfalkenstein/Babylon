@@ -27,7 +27,7 @@ class InputHandler {
             if (!player && input !== 'create') {
                 return {
                     'player': player, 'message': 'You have not created a player yet.\n' +
-                    'Use \'!create\' to create a new player.'
+                    'Use "!create" to create a new player.'
                 };
             }
             if (player && player.gameState === enums.GAME_STATES.GAME_DONE && input !== 'create') {
@@ -108,7 +108,7 @@ class InputHandler {
 
     static handleCombatCommands(input, parsedInputData, player) {
         let defer = q.defer();
-        if (!player) return 'You\'re dead!\nUse \'!load\' to load a previous save.';
+        if (!player) return 'You"re dead!\nUse "!load" to load a previous save.';
         let targetNPC = this.getTargetNPC(player, parsedInputData);
         if (targetNPC) {
             player.gameState = enums.GAME_STATES.COMBAT;
@@ -243,7 +243,7 @@ class InputHandler {
             } else {
                 defer.resolve({
                     'player': null, 'message': 'You have not created a player yet.\n' +
-                    'Use \'-load\' to load an existing player, or \'-create\' to create a new player.'
+                    'Use "-load" to load an existing player, or "-create" to create a new player.'
                 });
             }
         });
@@ -252,46 +252,51 @@ class InputHandler {
     }
 
     static gameBeatenMessage() {
-        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
-        retString +=        '┃ You have reached the exit of the final floor! ┃\n';
-        retString +=        '┃             Thanks for playing!               ┃\n';
-        retString +=        '┃     You may use \'!create\' to create a new     ┃\n';
-        retString +=        '┃           character at any time.              ┃\n';
-        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
+        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃ You have reached the exit of the final floor!    ┃\n';
+        retString +=        '┃ Thanks for playing!                              ┃\n';
+        retString +=        '┃ You may use "!create" to create a new            ┃\n';
+        retString +=        '┃ character at any time.                           ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
         return retString;
     }
 
     static playerDeadMessage() {
-        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
-        retString +=        '┃               You have died.                  ┃\n';
-        retString +=        '┃     You may use \'!create\' to create a new     ┃\n';
-        retString +=        '┃           character at any time.              ┃\n';
-        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
+        let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃ You have died.                                   ┃\n';
+        retString +=        '┃ You may use "!create" to create a new            ┃\n';
+        retString +=        '┃ character at any time.                           ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛```\n';
         return retString;
     }
 
     static getHelpMessage() {
         let retString =  '```┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
+        retString +=        '┃ Welcome to Babylon!                              ┃\n';
+        retString +=        '┃ Below is a list of valid commands.               ┃\n';
+        retString +=        '┃ All commands must be preceded by "!" or @Babylon ┃\n';
+        retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n';
+        retString +=        '┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
         retString +=        '┃ Command    ┃ Description                         ┃\n';
         retString +=        '┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃\n';
         retString +=        '┃ !create    ┃ create a new character. START HERE  ┃\n';
         retString +=        '┃ ==== THIS WILL DELETE YOUR CURRENT PROGRESS ==== ┃\n';
-        retString +=        '┃ !look      ┃ look around the room you\'re in.     ┃\n';
-        retString +=        '┃     note:  ┃ \'examine\' or \'search\' work too!     ┃\n';
+        retString +=        '┃ !look      ┃ look around the room you are in.    ┃\n';
+        retString +=        '┃     note:  ┃ "examine" or "search" work too!     ┃\n';
         retString +=        '┃ !info      ┃ glance at your ID card.             ┃\n';
         retString +=        '┃ !attack    ┃ attack something (with something).  ┃\n';
-        retString +=        '┃     ex:    ┃ \'!attack robot with stunprod\'       ┃\n';
+        retString +=        '┃     ex:    ┃ "!attack robot with stunprod"       ┃\n';
         retString +=        '┃ !use       ┃ use an item (with something).       ┃\n';
-        retString +=        '┃     ex:    ┃ \'!use keycard on door\'              ┃\n';
+        retString +=        '┃     ex:    ┃ "!use keycard on door"              ┃\n';
         retString +=        '┃ !map       ┃ glance at your auto-generated map.  ┃\n';
         retString +=        '┃ !north     ┃ move north (or south/east/west).    ┃\n';
-        retString +=        '┃     note:  ┃ \'n\' or \'up\' work too!               ┃\n';
+        retString +=        '┃     note:  ┃ "n" or "up" work too!               ┃\n';
         retString +=        '┃ !stairs    ┃ take the stairs to the next level.  ┃\n';
         retString +=        '┃ !get       ┃ try to pick up something you see.   ┃\n';
-        retString +=        '┃     note:  ┃ \'take\' or \'grab\' work too!          ┃\n';
-        retString +=        '┃ !drop      ┃ drop an item that you\'re carrying.  ┃\n';
-        retString +=        '┃     note:  ┃ \'leave\' works too!                  ┃\n';
-        retString +=        '┃ !inventory ┃ look at what you\'re carrying.       ┃\n';
+        retString +=        '┃     note:  ┃ "take" or "grab" work too!          ┃\n';
+        retString +=        '┃ !drop      ┃ drop an item that you a carrying.   ┃\n';
+        retString +=        '┃     note:  ┃ "leave" works too!                  ┃\n';
+        retString +=        '┃ !inventory ┃ look at what you are carrying.      ┃\n';
         retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n';
         retString +=        '┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n';
         retString +=        '┃ Map Legend                                       ┃\n';
@@ -301,10 +306,7 @@ class InputHandler {
         retString +=        '┃ █ ████░░░░░░░░░ ┃ D - locked door                ┃\n';
         retString +=        '┃ █ █████D█░░░░░░ ┃ @ - you!                       ┃\n';
         retString +=        '┃ █      @ ░░░░░░ ┃ S - stairs to the next floor   ┃\n';
-        retString +=        '┃ ████ ██ █░░░░░░ ┃                                ┃\n';
-        retString +=        '┃ ░░░░░░░░░░░░░░░ ┃                                ┃\n';
-        retString +=        '┃ ░░░░░░░░░░░░░░░ ┃                                ┃\n';
-        retString +=        '┃ ░░░░░░░░░░░░░░░ ┃                                ┃\n';
+        retString +=        '┃ █████████░░░░░░ ┃                                ┃\n';
         retString +=        '┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n```';
         return retString;
     }
